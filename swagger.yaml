@@ -1,0 +1,254 @@
+openapi: 3.0.3
+info:
+  title: Book Library Tool API
+  version: 1.0.0
+paths:
+  /books:
+    post:
+      summary: Add new book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Book"
+            examples:
+              example-1:
+                summary: A sample book
+                value:
+                  bookId: "5345346X12"
+                  title: "The Great Gatsby"
+                  author: "F. Scott Fitzgerald"
+                  publicationYear: 1925
+                  publisher: "Scribner"
+                  price: 10.99
+      responses:
+        "201":
+          description: Book added
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Invalid request example
+                  value:
+                    message: "Invalid input data"
+                    code: 400
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Unexpected error example
+                  value:
+                    message: "Unexpected error occurred"
+                    code: 500
+  /books/{id}:
+    get:
+      summary: Get a book by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Book found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+              examples:
+                example-1:
+                  summary: A sample book response
+                  value:
+                    bookId: "1"
+                    title: "The Great Gatsby"
+                    author: "F. Scott Fitzgerald"
+                    publicationYear: 1925
+                    publisher: "Scribner"
+                    price: 10.99
+                    stock: 100
+        "404":
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Book not found example
+                  value:
+                    message: "Book not found"
+                    code: 404
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Unexpected error example
+                  value:
+                    message: "Unexpected error occurred"
+                    code: 500
+    delete:
+      summary: Delete a book by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Book deleted
+        "404":
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Book not found example
+                  value:
+                    message: "Book not found"
+                    code: 404
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Unexpected error example
+                  value:
+                    message: "Unexpected error occurred"
+                    code: 500
+  /books/search:
+    get:
+      summary: Search books by title, author, or publication year
+      parameters:
+        - name: title
+          in: query
+          description: Filter by book title (optional)
+          schema:
+            type: string
+        - name: author
+          in: query
+          description: Filter by author name (optional)
+          schema:
+            type: string
+        - name: publicationYear
+          in: query
+          description: Filter by publication year (optional)
+          schema:
+            type: integer
+            minimum: 1000
+            maximum: 9999
+      responses:
+        "200":
+          description: List of books matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+              examples:
+                example-1:
+                  summary: A sample search response
+                  value:
+                    - bookId: "1"
+                      title: "The Great Gatsby"
+                      author: "F. Scott Fitzgerald"
+                      publicationYear: 1925
+                      publisher: "Scribner"
+                      price: 10.99
+                      stock: 100
+                    - bookId: "2"
+                      title: "To Kill a Mockingbird"
+                      author: "Harper Lee"
+                      publicationYear: 1960
+                      publisher: "J.B. Lippincott & Co."
+                      price: 7.99
+                      stock: 50
+        "400":
+          description: Invalid search parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Invalid search parameters example
+                  value:
+                    message: "Invalid search parameters"
+                    code: 400
+        "404":
+          description: No books found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: No books found example
+                  value:
+                    message: "No books not found"
+                    code: 404
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Unexpected error example
+                  value:
+                    message: "Unexpected error occurred"
+                    code: 500
+components:
+  schemas:
+    Book:
+      type: object
+      required:
+        - bookId
+        - title
+        - author
+        - publicationYear
+        - publisher
+        - price
+        - stock
+      properties:
+        bookId:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        publicationYear:
+          type: integer
+        publisher:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+          readOnly: true
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
