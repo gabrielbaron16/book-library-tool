@@ -219,6 +219,113 @@ paths:
                   value:
                     message: "Unexpected error occurred"
                     code: 500
+  /users:
+    post:
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+            examples:
+              example-1:
+                summary: A sample user
+                value:
+                  email: "user@example.com"
+                  balance: 100.0
+      responses:
+        "201":
+          description: User created
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Invalid request example
+                  value:
+                    message: "Invalid input data"
+                    code: 400
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Unexpected error example
+                  value:
+                    message: "Unexpected error occurred"
+                    code: 500
+
+  /users/{email}/balance:
+    patch:
+      summary: Update user balance
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - balance
+              properties:
+                balance:
+                  type: number
+            examples:
+              example-1:
+                summary: Update balance example
+                value:
+                  balance: 150.0
+      responses:
+        "200":
+          description: Balance updated
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Invalid request example
+                  value:
+                    message: "Invalid input data"
+                    code: 400
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: User not found example
+                  value:
+                    message: "User not found"
+                    code: 404
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Unexpected error example
+                  value:
+                    message: "Unexpected error occurred"
+                    code: 500
 components:
   schemas:
     Book:
@@ -240,6 +347,8 @@ components:
           type: string
         publicationYear:
           type: integer
+          minimum: 1400
+          maximum: 2025
         publisher:
           type: string
         price:
@@ -247,6 +356,18 @@ components:
         stock:
           type: integer
           readOnly: true
+    User:
+      type: object
+      required:
+        - email
+        - balance
+      properties:
+        email:
+          type: string
+          format: email
+        balance:
+          type: number
+          minimum: 0.01
     ErrorResponse:
       type: object
       properties:
