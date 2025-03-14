@@ -2,9 +2,16 @@ openapi: 3.0.3
 info:
   title: Book Library Tool API
   version: 1.0.0
+tags:
+  - name: Books
+    description: Endpoints related to books
+  - name: Users
+    description: Endpoints related to users
 paths:
   /books:
     post:
+      tags:
+        - Books
       summary: Add new book
       requestBody:
         required: true
@@ -51,6 +58,8 @@ paths:
                     code: 500
   /books/{id}:
     get:
+      tags:
+        - Books
       summary: Get a book by id
       parameters:
         - name: id
@@ -101,6 +110,8 @@ paths:
                     message: "Unexpected error occurred"
                     code: 500
     delete:
+      tags:
+        - Books
       summary: Delete a book by id
       parameters:
         - name: id
@@ -137,6 +148,8 @@ paths:
                     code: 500
   /books/search:
     get:
+      tags:
+        - Books
       summary: Search books by title, author, or publication year
       parameters:
         - name: title
@@ -156,33 +169,55 @@ paths:
             type: integer
             minimum: 1000
             maximum: 9999
+        - name: page
+          in: query
+          required: true
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+        - name: limit
+          in: query
+          required: true
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
       responses:
         "200":
           description: List of books matching the search criteria
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Book"
+                type: object
+                properties:
+                  books:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Book"
+                  totalRecords:
+                    type: integer
               examples:
                 example-1:
                   summary: A sample search response
                   value:
-                    - bookId: "1"
-                      title: "The Great Gatsby"
-                      author: "F. Scott Fitzgerald"
-                      publicationYear: 1925
-                      publisher: "Scribner"
-                      price: 10.99
-                      stock: 100
-                    - bookId: "2"
-                      title: "To Kill a Mockingbird"
-                      author: "Harper Lee"
-                      publicationYear: 1960
-                      publisher: "J.B. Lippincott & Co."
-                      price: 7.99
-                      stock: 50
+                    books:
+                      - bookId: "1"
+                        title: "The Great Gatsby"
+                        author: "F. Scott Fitzgerald"
+                        publicationYear: 1925
+                        publisher: "Scribner"
+                        price: 10.99
+                        stock: 100
+                      - bookId: "2"
+                        title: "To Kill a Mockingbird"
+                        author: "Harper Lee"
+                        publicationYear: 1960
+                        publisher: "J.B. Lippincott & Co."
+                        price: 7.99
+                        stock: 50
+                    totalRecords: 2
         "400":
           description: Invalid search parameters
           content:
@@ -205,7 +240,7 @@ paths:
                 example-1:
                   summary: No books found example
                   value:
-                    message: "No books not found"
+                    message: "No books found"
                     code: 404
         "500":
           description: Unexpected error
@@ -221,6 +256,8 @@ paths:
                     code: 500
   /users:
     post:
+      tags:
+        - Users
       summary: Create a new user
       requestBody:
         required: true
@@ -264,6 +301,8 @@ paths:
 
   /users/{email}/balance:
     patch:
+      tags:
+        - Users
       summary: Update user balance
       parameters:
         - name: email

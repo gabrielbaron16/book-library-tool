@@ -1,44 +1,27 @@
 import { injectable } from "tsyringe";
 import { IBookRepository } from "../../domain/repositories/IBookRepository";
 import { Book } from "../../domain/entities/Book";
-import { MongoClient, WithId, Document } from "mongodb";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { BookModel } from "../models/BookModel";
 
 @injectable()
 export class MongoBookRepository implements IBookRepository {
-    private collection;
-
-    constructor() {
-        const client = new MongoClient(process.env.MONGO_URL!);
-        this.collection = client.db("library").collection("books");
-        this.createIndexes();
-    }
-
-    private async createIndexes() {
-        await this.collection.createIndex({ bookId: 1 }, { unique: true });
-        await this.collection.createIndex({ title: 1 });
-        await this.collection.createIndex({ author: 1 });
-        await this.collection.createIndex({ publicationYear: 1 });
-    }
 
     async findById(bookId: string): Promise<Book | null> {
-        const doc = await this.collection.findOne({ bookId });
+        const doc = await BookModel.findOne({ bookId }).lean();
         return doc ? this.mapDocumentToBook(doc) : null;
     }
 
-    async findByFilters(title?: string, author?: string, publicationYear?: number): Promise<Book[]> {
+    async findByFilters(skip: number, limit: number, title?: string, author?: string, publicationYear?: number): Promise<{ books: Book[], totalRecords: number }> {
         const query: any = {};
         if (title) query.title = title;
         if (author) query.author = author;
         if (publicationYear) query.publicationYear = publicationYear;
-        console.log(query);
 
         try {
-            const docs = await this.collection.find(query).toArray();
-            console.log("Books found: ", docs)
-            return docs.map(this.mapDocumentToBook);
+            const totalRecords = await BookModel.countDocuments(query);
+            const docs = await BookModel.find(query).skip(skip).limit(limit).lean();
+            const books = docs.map(this.mapDocumentToBook);
+            return { books, totalRecords };
         } catch (error) {
             console.error("Error finding books:", error);
             throw error;
@@ -47,7 +30,7 @@ export class MongoBookRepository implements IBookRepository {
 
     async save(book: Book): Promise<void> {
         try {
-            await this.collection.insertOne(book);
+            await BookModel.create(book);
             console.log("Book saved successfully:", book);
         } catch (error) {
             console.error("Error saving book:", error);
@@ -56,11 +39,15 @@ export class MongoBookRepository implements IBookRepository {
     }
 
     async delete(bookId: string): Promise<boolean> {
-        const result = await this.collection.deleteOne({ bookId });
+        const result = await BookModel.deleteOne({ bookId });
         return result.deletedCount > 0;
     }
 
-    private mapDocumentToBook(doc: WithId<Document>): Book {
+    async exists(bookId: string): Promise<boolean> {
+        return await BookModel.exists({ bookId }) !== null;
+    }
+
+    private mapDocumentToBook(doc: any): Book {
         return {
             bookId: doc.bookId,
             title: doc.title,

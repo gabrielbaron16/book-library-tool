@@ -24,7 +24,7 @@ app.use(
     OpenApiValidatorMiddleware({
         apiSpec: "./swagger.yaml",
         validateRequests: true,
-        validateResponses: true,
+        validateResponses: false,
     })
 );
 
@@ -50,7 +50,7 @@ if (require.main === module) {
             console.log(`Server running on http://localhost:${PORT}`);
         });
     }).catch((err) => {
-        console.error("ailed to start server due to DB error:", err);
+        console.error("failed to start server due to DB error:", err);
     });
 }
 

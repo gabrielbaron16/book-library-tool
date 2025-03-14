@@ -12,12 +12,13 @@ export class BookService implements IBookService {
         return await this.bookRepository.findById(id);
     }
 
-    async searchBooks(title?: string, author?: string, publicationYear?: number): Promise<Book[]> {
-        return await this.bookRepository.findByFilters(title, author, publicationYear);
+    async searchBooks(page: number, limit: number, title?: string, author?: string, publicationYear?: number): Promise<{ books: Book[], totalRecords: number }> {
+        const skip = (page - 1) * limit;
+        return this.bookRepository.findByFilters(skip, limit, title, author, publicationYear);
     }
 
     async createBook(book: Book): Promise<void> {
-        const existingBook = await this.bookRepository.findById(book.bookId);
+        const existingBook = await this.bookRepository.exists(book.bookId);
         if (existingBook) {
             throw new RecordAlreadyExistsError(`Book with ID ${book.bookId} already exists.`);
         }

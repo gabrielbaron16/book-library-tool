@@ -1,13 +1,3 @@
-export class AddBookDTO {
-    constructor(
-        public title: string,
-        public author: string,
-        public publicationYear: number,
-        public publisher: string,
-        public price: number
-    ) {}
-}
-
 export class BookDTO {
     constructor(
         public bookId: string,

@@ -10,21 +10,30 @@ const bookService = container.resolve<IBookService>("IBookService");
 
 export const getBookById = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const book = await bookService.getBookById(id);
-    if (!book) {
+    try {
+        const book = await bookService.getBookById(id);
+        if (!book) {
+            const errorResponse: ErrorResponseDTO = {
+                message: "Book not found"
+            };
+            res.status(404).send(errorResponse);
+            return;
+        }
+        res.status(200).send(book);
+    } catch (e) {
         const errorResponse: ErrorResponseDTO = {
-            message: "Book not found"
+            message: "Unexpected error fetching book information"
         };
-        res.status(404).send(errorResponse);
-        return;
+        res.status(500).send(errorResponse);
     }
-    res.status(200).send(book)
 };
 
 export const searchBooks = async (req: Request, res: Response) => {
-    const { title, author, publicationYear } = req.query;
+    const { title, author, publicationYear, page, limit } = req.query;
     try {
-        const books = await bookService.searchBooks(
+        const { books, totalRecords } = await bookService.searchBooks(
+            parseInt(page as string, 10),
+            parseInt(limit as string, 10),
             title as string | undefined,
             author as string | undefined,
             publicationYear ? parseInt(publicationYear as string, 10) : undefined
@@ -37,9 +46,8 @@ export const searchBooks = async (req: Request, res: Response) => {
             return;
         }
         const booksResponse = books.map(book => mapBookToBookDto(book));
-        res.status(200).send(booksResponse);
+        res.status(200).send({ books: booksResponse, totalRecords });
     } catch (e) {
-        console.log(e)
         const errorResponse: ErrorResponseDTO = {
             message: "Unexpected error searching books"
         };
@@ -71,13 +79,20 @@ export const addBook = async (req: Request, res: Response) => {
 
 export const deleteBookById = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const deleted = await bookService.deleteBook(id);
-    if (deleted) {
-        res.status(200).end();
-    } else {
+    try {
+        const deleted = await bookService.deleteBook(id);
+        if (deleted) {
+            res.status(200).end();
+        } else {
+            const errorResponse: ErrorResponseDTO = {
+                message: "Book not found"
+            };
+            res.status(404).send(errorResponse);
+        }
+    } catch (e) {
         const errorResponse: ErrorResponseDTO = {
-            message: "Book not found"
+            message: "Unexpected error deleting a book"
         };
-        res.status(404).send(errorResponse);
+        res.status(500).send(errorResponse);
     }
 };

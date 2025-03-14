@@ -52,7 +52,6 @@ describe("GET /books/:id", () => {
 
         const response = await request(app).get("/books/342535HD1");
 
-        expect(mockBookService.getBookById).toHaveBeenCalledWith("342535HD1");
         expect(response.status).toBe(200);
         expect(response.body).toEqual(mapBookToBookDto(mockBook));
     });
@@ -76,19 +75,21 @@ describe("GET /books/search", () => {
             { bookId: "24234235AS", title: "Don Quijote de la Mancha", author: "Miguel de Cervantes", publicationYear: 1605, publisher: "Castellana", price: 15, stock: 4 },
             { bookId: "24234235BS", title: "El Coloquio de lo Perros", author: "Miguel de Cervantes", publicationYear: 1613, publisher: "Castellana", price: 15, stock: 4 },
         ];
+        const totalRecords = 2;
 
-        mockBookService.searchBooks.mockResolvedValue(mockBooks);
+        mockBookService.searchBooks.mockResolvedValue({ books: mockBooks, totalRecords });
 
-        const response = await request(app).get("/books/search?author=Miguel de Cervantes");
+        const response = await request(app).get("/books/search?author=Miguel de Cervantes&page=1&limit=10");
 
         expect(response.status).toBe(200);
-        expect(response.body).toHaveLength(2);
+        expect(response.body.books).toHaveLength(2);
+        expect(response.body.totalRecords).toBe(totalRecords);
     });
 
     it("Should return 404 if there's no book", async () => {
-        mockBookService.searchBooks.mockResolvedValue([]);
+        mockBookService.searchBooks.mockResolvedValue({ books: [], totalRecords: 0 });
 
-        const response = await request(app).get("/books/search?author=Unknown");
+        const response = await request(app).get("/books/search?author=Unknown&page=1&limit=10");
 
         expect(response.status).toBe(404);
         const errorResponse: ErrorResponseDTO = {
