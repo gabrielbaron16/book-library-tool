@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {addBook, deleteBookById, getBookById, searchBooks} from "../controllers/book/BookController";
 import {addUser, updateUserBalance} from "../controllers/user/UserController";
+import {addReservation} from "../controllers/reservation/ReservationController";
 
 const router = Router();
 
@@ -11,5 +12,7 @@ router.delete("/books/:id", deleteBookById);
 
 router.post("/users", addUser);
 router.patch("/users/:email/balance", updateUserBalance);
+
+router.post("/reservations", addReservation);
 
 export default router;

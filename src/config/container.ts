@@ -8,12 +8,19 @@ import {MongoUserRepository} from "../infrastructure/repositories/MongoUserRepos
 import {IUserRepository} from "../domain/repositories/IUserRepository";
 import {IUserService} from "../application/services/user/IUserService";
 import {UserService} from "../application/services/user/UserService";
+import {IReservationRepository} from "../domain/repositories/IReservationRepository";
+import {IReservationService} from "../application/services/reservation/IReservationService";
+import {MongoReservationRepository} from "../infrastructure/repositories/MongoReservationRepository";
+import {ReservationService} from "../application/services/reservation/ReservationService";
 
 container.register<IBookRepository>("IBookRepository", { useClass: MongoBookRepository });
 container.register<IBookService>("IBookService", { useClass: BookService });
 
 container.register<IUserRepository>("IUserRepository", { useClass: MongoUserRepository });
 container.register<IUserService>("IUserService", { useClass: UserService });
+
+container.register<IReservationRepository>("IReservationRepository", { useClass: MongoReservationRepository });
+container.register<IReservationService>("IReservationService", { useClass: ReservationService });
 
 
 export { container };

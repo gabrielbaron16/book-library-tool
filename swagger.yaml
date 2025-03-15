@@ -7,6 +7,8 @@ tags:
     description: Endpoints related to books
   - name: Users
     description: Endpoints related to users
+  - name: Reservations
+    description: Endpoints related to reservations
 paths:
   /books:
     post:
@@ -365,6 +367,52 @@ paths:
                   value:
                     message: "Unexpected error occurred"
                     code: 500
+  /reservations:
+    post:
+      tags:
+        - Reservations
+      summary: Add new reservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Reservation"
+            examples:
+              example-1:
+                summary: A sample reservation
+                value:
+                  userEmail: "gabrielbu161@gmail.com"
+                  bookId: "5345346X12"
+                  bookCount: 1
+                  returnDate: "2025-03-30T12:30:00Z"
+      responses:
+        "201":
+          description: Reservation added
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Invalid request example
+                  value:
+                    message: "Invalid input data"
+                    code: 400
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Unexpected error example
+                  value:
+                    message: "Unexpected error occurred"
+                    code: 500
 components:
   schemas:
     Book:
@@ -412,3 +460,29 @@ components:
       properties:
         message:
           type: string
+    Reservation:
+      type: object
+      required:
+        - userEmail
+        - bookId
+        - bookCount
+        - returnDate
+      properties:
+        userEmail:
+          type: string
+        bookId:
+          type: string
+        bookCount:
+          type: integer
+          minimum: 1
+          maximum: 3
+        returnDate:
+          type: string
+          format: date-time
+        reservationDate:
+          type: string
+          format: date-time
+          readOnly: true
+        isReturned:
+          type: boolean
+          readOnly: true

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.MONGO_URI || "mongodb://admin:secret@localhost:27017";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/?replicaSet=rs0&directConnection=true";
 
 export const connectDB = async () => {
     try {

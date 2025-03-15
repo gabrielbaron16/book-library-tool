@@ -7,11 +7,25 @@ services:
     restart: always
     ports:
       - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: secret
+    command: ["mongod", "--replSet", "rs0"]
     volumes:
       - mongo_data:/data/db
+
+  mongo-init:
+    image: mongo:latest
+    container_name: mongo-init
+    depends_on:
+      - mongodb
+    restart: "no"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sleep 5 &&
+        mongosh --host mongodb:27017 --eval "
+        rs.initiate({
+          _id: 'rs0',
+          members: [{ _id: 0, host: 'mongodb:27017' }]
+        })"
 
 volumes:
   mongo_data:
