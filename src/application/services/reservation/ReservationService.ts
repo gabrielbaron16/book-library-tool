@@ -32,7 +32,7 @@ export class ReservationService implements IReservationService {
 
         const userBalance = await this.userRepository.getBalance(reservation.userEmail);
         if (!userBalance || userBalance < RESERVATION_COST) {
-            throw new ControlledError("Insufficient balance.");
+            throw new ControlledError(`User with email ${reservation.userEmail} has insufficient balance.`);
         }
 
         await this.reservationRepository.save(reservation);

@@ -23,7 +23,7 @@ export const addReservation = async (req: Request, res: Response) => {
             res.status(400).send(errorResponse);
         } else {
             errorResponse = {
-                message: "Unexpected error adding a new Reservation"
+                message: "Unexpected error adding a new reservation"
             };
             res.status(500).send(errorResponse);
         }
