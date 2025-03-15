@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { container } from "../../config/container";
 import request from "supertest";
 import { IBookService } from "../../application/services/book/IBookService";
-import { RecordAlreadyExistsError } from "../../domain/errors/RecordAlreadyExists";
+import { ControlledError } from "../../domain/errors/ControlledError";
 import {Book} from "../../domain/entities/Book";
 import {ErrorResponseDTO} from "../dto/Error";
 import {BookDTO} from "../dto/BookDTO";
@@ -119,7 +119,7 @@ describe("POST /books", () => {
 
     it("should return 400 if the book already exists in database", async () => {
         mockBookService.createBook.mockRejectedValue(
-            new RecordAlreadyExistsError("Book with ID 342535HD1 already exists.")
+            new ControlledError("Book with ID 342535HD1 already exists.")
         );
 
         const newBook: BookDTO = {

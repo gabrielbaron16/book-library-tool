@@ -1,4 +1,4 @@
-export class RecordAlreadyExistsError extends Error {
+export class ControlledError extends Error {
 
     constructor(message: string) {
         super(message);

@@ -2,7 +2,7 @@ import { injectable, inject } from "tsyringe";
 import { IBookService } from "./IBookService";
 import { IBookRepository } from "../../../domain/repositories/IBookRepository";
 import { Book } from "../../../domain/entities/Book";
-import {RecordAlreadyExistsError} from "../../../domain/errors/RecordAlreadyExists";
+import {ControlledError} from "../../../domain/errors/ControlledError";
 
 @injectable()
 export class BookService implements IBookService {
@@ -20,7 +20,7 @@ export class BookService implements IBookService {
     async createBook(book: Book): Promise<void> {
         const existingBook = await this.bookRepository.exists(book.bookId);
         if (existingBook) {
-            throw new RecordAlreadyExistsError(`Book with ID ${book.bookId} already exists.`);
+            throw new ControlledError(`Book with ID ${book.bookId} already exists.`);
         }
         await this.bookRepository.save(book);
     }

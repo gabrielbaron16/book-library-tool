@@ -4,7 +4,7 @@ import { IUserService } from "../../application/services/user/IUserService";
 import { UserDTO } from "../dto/UserDTO";
 import { mapUserDtoToUser } from "../../domain/mappers/UserMappers";
 import { ErrorResponseDTO } from "../dto/Error";
-import { RecordAlreadyExistsError } from "../../domain/errors/RecordAlreadyExists";
+import { ControlledError } from "../../domain/errors/ControlledError";
 
 const userService = container.resolve<IUserService>("IUserService");
 
@@ -16,7 +16,7 @@ export const addUser = async (req: Request, res: Response) => {
         res.status(201).end();
     } catch (e) {
         let errorResponse: ErrorResponseDTO;
-        if (e instanceof RecordAlreadyExistsError) {
+        if (e instanceof ControlledError) {
             errorResponse = {
                 message: e.message
             };

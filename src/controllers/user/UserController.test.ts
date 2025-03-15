@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { container } from "../../config/container";
 import request from "supertest";
 import { IUserService } from "../../application/services/user/IUserService";
-import { RecordAlreadyExistsError } from "../../domain/errors/RecordAlreadyExists";
+import { ControlledError } from "../../domain/errors/ControlledError";
 import {ErrorResponseDTO} from "../dto/Error";
 import {UserDTO} from "../dto/UserDTO";
 
@@ -48,7 +48,7 @@ describe("POST /user", () => {
 
     it("should return 400 if the User already exists in database", async () => {
         mockUserService.createUser.mockRejectedValue(
-            new RecordAlreadyExistsError("User with email richardgasquet@gmail.com already exists.")
+            new ControlledError("User with email richardgasquet@gmail.com already exists.")
         );
 
         const newUser: UserDTO = {

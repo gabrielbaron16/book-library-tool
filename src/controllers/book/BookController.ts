@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { container } from "../../config/container";
 import { IBookService } from "../../application/services/book/IBookService";
-import {BookDTO} from "../dto/BookDTO";
-import {mapBookDtoToBook, mapBookToBookDto} from "../../domain/mappers/BookMappers";
-import {ErrorResponseDTO} from "../dto/Error";
-import {RecordAlreadyExistsError} from "../../domain/errors/RecordAlreadyExists";
+import { BookDTO } from "../dto/BookDTO";
+import { mapBookDtoToBook, mapBookToBookDto } from "../../domain/mappers/BookMappers";
+import { ErrorResponseDTO } from "../dto/Error";
+import { ControlledError } from "../../domain/errors/ControlledError";
 
 const bookService = container.resolve<IBookService>("IBookService");
 
@@ -63,7 +63,7 @@ export const addBook = async (req: Request, res: Response) => {
         res.status(201).end();
     } catch (e) {
         let errorResponse: ErrorResponseDTO;
-        if (e instanceof RecordAlreadyExistsError) {
+        if (e instanceof ControlledError) {
             errorResponse = {
                 message: e.message
             };

@@ -5,9 +5,9 @@ export interface IBook extends Document {
     title: string;
     author: string;
     publicationYear: number;
-    publisher?: string;
-    price?: number;
-    stock?: number;
+    publisher: string;
+    price: number;
+    stock: number;
 }
 
 const BookSchema = new Schema<IBook>({
@@ -17,7 +17,7 @@ const BookSchema = new Schema<IBook>({
     publicationYear: { type: Number, required: true, index: true },
     publisher: { type: String },
     price: { type: Number },
-    stock: { type: Number}
+    stock: { type: Number, min: 0}
 });
 
 export const BookModel = mongoose.model<IBook>("Book", BookSchema);
