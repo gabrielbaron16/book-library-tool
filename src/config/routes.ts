@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {addBook, deleteBookById, getBookById, searchBooks} from "../controllers/book/BookController";
 import {addUser, updateUserBalance} from "../controllers/user/UserController";
-import {addReservation} from "../controllers/reservation/ReservationController";
+import {addReservation, getReservationsByBookId} from "../controllers/reservation/ReservationController";
 
 const router = Router();
 
@@ -14,5 +14,6 @@ router.post("/users", addUser);
 router.patch("/users/:email/balance", updateUserBalance);
 
 router.post("/reservations", addReservation);
+router.get("/reservations/book/:bookId", getReservationsByBookId);
 
 export default router;

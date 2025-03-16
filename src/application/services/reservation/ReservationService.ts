@@ -40,4 +40,9 @@ export class ReservationService implements IReservationService {
         const newBalance = userBalance - RESERVATION_COST;
         await this.userRepository.updateBalance(reservation.userEmail, newBalance);
     }
+
+    async getReservationsByBookId(bookId: string, page: number, limit: number): Promise<{ reservations: Reservation[], totalRecords: number }> {
+        const offset = (page - 1) * limit;
+        return this.reservationRepository.findByBookId(bookId, offset, limit);
+    }
 }

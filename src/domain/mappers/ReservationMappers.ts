@@ -10,3 +10,13 @@ export const mapReservationDtoToReservation = (reservationDto: ReservationDTO): 
         new Date(),
         false
     );
+
+export const mapReservationToReservationDto = (reservation: Reservation): ReservationDTO =>
+    new Reservation(
+        reservation.userEmail,
+        reservation.bookId,
+        reservation.bookCount,
+        reservation.returnDate,
+        reservation.reservationDate,
+        reservation.isReturned
+    );

@@ -37,4 +37,10 @@ export class MongoReservationRepository implements IReservationRepository {
             await session.endSession();
         }
     }
+
+    async findByBookId(bookId: string, offset: number, limit: number): Promise<{ reservations: Reservation[], totalRecords: number }> {
+        const reservations = await ReservationModel.find({ bookId }).skip(offset).limit(limit).exec();
+        const totalRecords = await ReservationModel.countDocuments({ bookId }).exec();
+        return { reservations, totalRecords };
+    }
 }

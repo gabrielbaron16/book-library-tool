@@ -31,7 +31,8 @@ beforeEach(() => {
     });
     jest.doMock("../../../domain/repositories/IReservationRepository", () => {
         return {
-            save: jest.fn(),
+            findByBookId: jest.fn(),
+
         };
     });
 
@@ -146,5 +147,28 @@ describe("createReservation Service", () => {
         await expect(reservationService.createReservation(reservation)).rejects.toThrow(
             new ControlledError("User with email peterrusso@gmail.com has insufficient balance.")
         );
+    });
+});
+
+describe("getReservationsByBookId Service", () => {
+    it("should return reservations and total records for a valid bookId", async () => {
+        const reservations: Reservation[] = [
+            { bookId: "214235l12", userEmail: "bernal@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false },
+        ];
+        mockReservationRepository.findByBookId.mockResolvedValue({ reservations, totalRecords: 1 });
+
+        const result = await reservationService.getReservationsByBookId("214235l12", 1, 10);
+
+        expect(result).toEqual({ reservations, totalRecords: 1 });
+        expect(mockReservationRepository.findByBookId).toHaveBeenCalledWith("214235l12", 0, 10);
+    });
+
+    it("should return an empty array and zero total records if no reservations are found", async () => {
+        mockReservationRepository.findByBookId.mockResolvedValue({ reservations: [], totalRecords: 0 });
+
+        const result = await reservationService.getReservationsByBookId("214235l12", 1, 10);
+
+        expect(result).toEqual({ reservations: [], totalRecords: 0 });
+        expect(mockReservationRepository.findByBookId).toHaveBeenCalledWith("214235l12", 0, 10);
     });
 });
