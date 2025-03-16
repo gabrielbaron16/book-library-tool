@@ -4,6 +4,7 @@ import { ReservationModel } from "../models/ReservationModel";
 import {Reservation} from "../../domain/entities/Reservation";
 import mongoose from "mongoose";
 import {BookModel} from "../models/BookModel";
+import logger from "../../config/logger";
 
 @injectable()
 export class MongoReservationRepository implements IReservationRepository {
@@ -23,15 +24,15 @@ export class MongoReservationRepository implements IReservationRepository {
 
             if (!book) {
                 await session.abortTransaction();
-                console.log("Book not found:", reservation.bookId);
+                logger.warn("Book not found:", reservation.bookId);
                 return false;
             }
             await session.commitTransaction();
-            console.log("Reservation saved successfully:", reservation);
+            logger.debug("Reservation saved successfully:", reservation);
             return true
         } catch (error) {
             await session.abortTransaction();
-            console.error("Error saving reservation:", error);
+            logger.error("Error saving reservation:", error);
             throw error;
         } finally {
             await session.endSession();

@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { IEmailService } from "../../domain/email/IEmailService";
+import logger from "../../config/logger";
 
 export class EmailService implements IEmailService {
     private transporter;
@@ -21,6 +22,6 @@ export class EmailService implements IEmailService {
         };
 
         await this.transporter.sendMail(mailOptions);
-        console.log(`📧 Email sent to ${to}`);
+        logger.debug(`📧 Email sent to ${to}`);
     }
 }

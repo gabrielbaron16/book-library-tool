@@ -5,6 +5,7 @@ import { UserDTO } from "../dto/UserDTO";
 import { mapUserDtoToUser } from "../../../domain/mappers/UserMappers";
 import { ErrorResponseDTO } from "../dto/Error";
 import { ControlledError } from "../../../domain/errors/ControlledError";
+import logger from "../../../config/logger";
 
 const userService = container.resolve<IUserService>("IUserService");
 
@@ -22,6 +23,7 @@ export const addUser = async (req: Request, res: Response) => {
             };
             res.status(400).send(errorResponse);
         } else {
+            logger.error("Unexpected error adding a new user", e);
             errorResponse = {
                 message: "Unexpected error adding a new user"
             };
@@ -44,6 +46,7 @@ export const updateUserBalance = async (req: Request, res: Response) => {
         }
         res.status(204).end();
     } catch (e) {
+        logger.error("Unexpected error updating user balance", e);
         const errorResponse: ErrorResponseDTO = {
             message: "Unexpected error updating user balance"
         };

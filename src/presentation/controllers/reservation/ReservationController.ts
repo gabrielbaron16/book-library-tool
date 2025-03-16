@@ -5,6 +5,7 @@ import {ReservationDTO} from "../dto/ReservationDTO";
 import {mapReservationDtoToReservation, mapReservationToReservationDto} from "../../../domain/mappers/ReservationMappers";
 import {ErrorResponseDTO} from "../dto/Error";
 import {ControlledError} from "../../../domain/errors/ControlledError";
+import logger from "../../../config/logger";
 
 const reservationService = container.resolve<IReservationService>("IReservationService");
 
@@ -31,6 +32,7 @@ export const addReservation = async (req: Request, res: Response) => {
             };
             res.status(400).send(errorResponse);
         } else {
+            logger.error("Unexpected error adding a new reservation", e);
             errorResponse = {
                 message: "Unexpected error adding a new reservation"
             };
@@ -60,6 +62,7 @@ export const getReservationsByBookId = async (req: Request, res: Response) => {
         const reservationResponse = reservations.map(reservation => mapReservationToReservationDto(reservation));
         res.status(200).send({reservations: reservationResponse, totalRecords});
     } catch (e) {
+        logger.error("Unexpected error fetching reservations", e);
         const errorResponse: ErrorResponseDTO = {
             message: "Unexpected error fetching reservations"
         };

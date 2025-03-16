@@ -2,6 +2,7 @@ import { injectable } from "tsyringe";
 import { IBookRepository } from "../../domain/repositories/IBookRepository";
 import { Book } from "../../domain/entities/Book";
 import { BookModel } from "../models/BookModel";
+import logger from "../../config/logger";
 
 @injectable()
 export class MongoBookRepository implements IBookRepository {
@@ -31,9 +32,9 @@ export class MongoBookRepository implements IBookRepository {
     async save(book: Book): Promise<void> {
         try {
             await BookModel.create(book);
-            console.log("Book saved successfully:", book);
+            logger.debug("Book saved successfully:", book);
         } catch (error) {
-            console.error("Error saving book:", error);
+            logger.error("Error saving book:", error);
             throw error;
         }
     }

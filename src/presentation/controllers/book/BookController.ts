@@ -5,6 +5,7 @@ import { BookDTO } from "../dto/BookDTO";
 import { mapBookDtoToBook, mapBookToBookDto } from "../../../domain/mappers/BookMappers";
 import { ErrorResponseDTO } from "../dto/Error";
 import { ControlledError } from "../../../domain/errors/ControlledError";
+import logger from "../../../config/logger";
 
 const bookService = container.resolve<IBookService>("IBookService");
 
@@ -21,6 +22,7 @@ export const getBookById = async (req: Request, res: Response) => {
         }
         res.status(200).send(book);
     } catch (e) {
+        logger.error("Unexpected error fetching book information", e);
         const errorResponse: ErrorResponseDTO = {
             message: "Unexpected error fetching book information"
         };
@@ -48,6 +50,7 @@ export const searchBooks = async (req: Request, res: Response) => {
         const booksResponse = books.map(book => mapBookToBookDto(book));
         res.status(200).send({ books: booksResponse, totalRecords });
     } catch (e) {
+        logger.error("Unexpected error searching books", e);
         const errorResponse: ErrorResponseDTO = {
             message: "Unexpected error searching books"
         };
@@ -69,6 +72,7 @@ export const addBook = async (req: Request, res: Response) => {
             };
             res.status(400).send(errorResponse);
         } else {
+            logger.error("Unexpected error adding a new book", e);
            errorResponse = {
                 message: "Unexpected error adding a new book"
             };
@@ -90,6 +94,7 @@ export const deleteBookById = async (req: Request, res: Response) => {
             res.status(404).send(errorResponse);
         }
     } catch (e) {
+        logger.error("Unexpected error deleting a book", e);
         const errorResponse: ErrorResponseDTO = {
             message: "Unexpected error deleting a book"
         };

@@ -9,6 +9,7 @@ import yaml from "js-yaml";
 import dotenv from "dotenv";
 import router from "./config/routes";
 import {ReminderJob} from "./presentation/jobs/ReminderJob";
+import logger from "./config/logger"
 
 
 dotenv.config();
@@ -49,10 +50,10 @@ if (require.main === module) {
     connectDB().then(() => {
         ReminderJob.startJobs();
         app.listen(PORT, () => {
-            console.log(`Server running on http://localhost:${PORT}`);
+            logger.info("Application started successfully!");
         });
     }).catch((err) => {
-        console.error("failed to start server due to DB error:", err);
+        logger.error("failed to start server due to DB error:", err);
     });
 }
 

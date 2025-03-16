@@ -1,6 +1,7 @@
 import { injectable } from "tsyringe";
 import { IUserRepository } from "../../domain/repositories/IUserRepository";
 import { UserModel, IUser } from "../models/UserModel";
+import logger from "../../config/logger";
 
 @injectable()
 export class MongoUserRepository implements IUserRepository {
@@ -9,9 +10,9 @@ export class MongoUserRepository implements IUserRepository {
         try {
             const newUser = new UserModel(user);
             await newUser.save();
-            console.log("User saved successfully:", user);
+            logger.debug("User saved successfully:", user);
         } catch (error) {
-            console.error("Error saving user:", error);
+            logger.error("Error saving user:", error);
             throw error;
         }
     }
