@@ -1,10 +1,10 @@
 import {Request, Response} from "express";
-import {container} from "../../config/container";
-import {IReservationService} from "../../application/services/reservation/IReservationService";
+import {container} from "../../../config/container";
+import {IReservationService} from "../../../application/services/reservation/IReservationService";
 import {ReservationDTO} from "../dto/ReservationDTO";
-import {mapReservationDtoToReservation, mapReservationToReservationDto} from "../../domain/mappers/ReservationMappers";
+import {mapReservationDtoToReservation, mapReservationToReservationDto} from "../../../domain/mappers/ReservationMappers";
 import {ErrorResponseDTO} from "../dto/Error";
-import {ControlledError} from "../../domain/errors/ControlledError";
+import {ControlledError} from "../../../domain/errors/ControlledError";
 
 const reservationService = container.resolve<IReservationService>("IReservationService");
 

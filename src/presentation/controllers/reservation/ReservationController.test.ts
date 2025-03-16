@@ -1,30 +1,30 @@
 import "reflect-metadata";
-import { container } from "../../config/container";
+import { container } from "../../../config/container";
 import request from "supertest";
-import { IReservationService } from "../../application/services/reservation/IReservationService";
-import { ControlledError } from "../../domain/errors/ControlledError";
+import { IReservationService } from "../../../application/services/reservation/IReservationService";
+import { ControlledError } from "../../../domain/errors/ControlledError";
 import {ErrorResponseDTO} from "../dto/Error";
 import {ReservationDTO} from "../dto/ReservationDTO";
-import {Reservation} from "../../domain/entities/Reservation";
+import {Reservation} from "../../../domain/entities/Reservation";
 
-jest.mock("../../application/services/Reservation/IReservationService");
+jest.mock("../../../application/services/reservation/IReservationService");
 
 let mockReservationService: jest.Mocked<IReservationService>;
 let app: any;
 
 beforeAll(async () => {
-    jest.doMock("../../application/services/Reservation/IReservationService", () => {
+    jest.doMock("../../../application/services/reservation/IReservationService", () => {
         return {
             createReservation: jest.fn(),
             getReservationsByBookId: jest.fn(),
         };
     });
 
-    mockReservationService = require("../../application/services/Reservation/IReservationService");
+    mockReservationService = require("../../../application/services/reservation/IReservationService");
 
     container.registerInstance<IReservationService>("IReservationService", mockReservationService);
 
-    const { app: importedApp } = await import("../../index");
+    const { app: importedApp } = await import("../../../index");
     app = importedApp;
 });
 

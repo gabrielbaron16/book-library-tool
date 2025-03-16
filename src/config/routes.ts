@@ -1,7 +1,7 @@
 import { Router } from "express";
-import {addBook, deleteBookById, getBookById, searchBooks} from "../controllers/book/BookController";
-import {addUser, updateUserBalance} from "../controllers/user/UserController";
-import {addReservation, getReservationsByBookId} from "../controllers/reservation/ReservationController";
+import {addBook, deleteBookById, getBookById, searchBooks} from "../presentation/controllers/book/BookController";
+import {addUser, updateUserBalance} from "../presentation/controllers/user/UserController";
+import {addReservation, getReservationsByBookId} from "../presentation/controllers/reservation/ReservationController";
 
 const router = Router();
 

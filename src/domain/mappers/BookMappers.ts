@@ -1,4 +1,4 @@
-import { BookDTO} from "../../controllers/dto/BookDTO";
+import { BookDTO} from "../../presentation/controllers/dto/BookDTO";
 import {Book} from "../entities/Book";
 
 export const mapBookDtoToBook = (bookDto: BookDTO): Book =>

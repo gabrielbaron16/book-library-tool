@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { container } from "../../config/container";
-import { IBookService } from "../../application/services/book/IBookService";
+import { container } from "../../../config/container";
+import { IBookService } from "../../../application/services/book/IBookService";
 import { BookDTO } from "../dto/BookDTO";
-import { mapBookDtoToBook, mapBookToBookDto } from "../../domain/mappers/BookMappers";
+import { mapBookDtoToBook, mapBookToBookDto } from "../../../domain/mappers/BookMappers";
 import { ErrorResponseDTO } from "../dto/Error";
-import { ControlledError } from "../../domain/errors/ControlledError";
+import { ControlledError } from "../../../domain/errors/ControlledError";
 
 const bookService = container.resolve<IBookService>("IBookService");
 

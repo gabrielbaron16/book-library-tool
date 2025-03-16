@@ -1,5 +1,5 @@
 import { Reservation } from "../entities/Reservation";
-import { ReservationDTO } from "../../controllers/dto/ReservationDTO";
+import { ReservationDTO } from "../../presentation/controllers/dto/ReservationDTO";
 
 export const mapReservationDtoToReservation = (reservationDto: ReservationDTO): Reservation =>
     new Reservation(

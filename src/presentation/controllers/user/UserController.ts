@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { container } from "../../config/container";
-import { IUserService } from "../../application/services/user/IUserService";
+import { container } from "../../../config/container";
+import { IUserService } from "../../../application/services/user/IUserService";
 import { UserDTO } from "../dto/UserDTO";
-import { mapUserDtoToUser } from "../../domain/mappers/UserMappers";
+import { mapUserDtoToUser } from "../../../domain/mappers/UserMappers";
 import { ErrorResponseDTO } from "../dto/Error";
-import { ControlledError } from "../../domain/errors/ControlledError";
+import { ControlledError } from "../../../domain/errors/ControlledError";
 
 const userService = container.resolve<IUserService>("IUserService");
 

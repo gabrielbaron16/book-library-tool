@@ -1,20 +1,20 @@
 import "reflect-metadata";
-import { container } from "../../config/container";
+import { container } from "../../../config/container";
 import request from "supertest";
-import { IBookService } from "../../application/services/book/IBookService";
-import { ControlledError } from "../../domain/errors/ControlledError";
-import {Book} from "../../domain/entities/Book";
+import { IBookService } from "../../../application/services/book/IBookService";
+import { ControlledError } from "../../../domain/errors/ControlledError";
+import {Book} from "../../../domain/entities/Book";
 import {ErrorResponseDTO} from "../dto/Error";
 import {BookDTO} from "../dto/BookDTO";
-import {mapBookToBookDto} from "../../domain/mappers/BookMappers";
+import {mapBookToBookDto} from "../../../domain/mappers/BookMappers";
 
-jest.mock("../../application/services/book/IBookService");
+jest.mock("../../../application/services/book/IBookService");
 
 let mockBookService: jest.Mocked<IBookService>;
 let app: any;
 
 beforeAll(async () => {
-    jest.doMock("../../application/services/book/IBookService", () => {
+    jest.doMock("../../../application/services/book/IBookService", () => {
         return {
             createBook: jest.fn(),
             getBookById: jest.fn(),
@@ -23,11 +23,11 @@ beforeAll(async () => {
         };
     });
 
-    mockBookService = require("../../application/services/book/IBookService");
+    mockBookService = require("../../../application/services/book/IBookService");
 
     container.registerInstance<IBookService>("IBookService", mockBookService);
 
-    const { app: importedApp } = await import("../../index");
+    const { app: importedApp } = await import("../../../index");
     app = importedApp;
 });
 

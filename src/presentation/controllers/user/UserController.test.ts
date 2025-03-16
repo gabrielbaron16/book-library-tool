@@ -1,29 +1,29 @@
 import "reflect-metadata";
-import { container } from "../../config/container";
+import { container } from "../../../config/container";
 import request from "supertest";
-import { IUserService } from "../../application/services/user/IUserService";
-import { ControlledError } from "../../domain/errors/ControlledError";
+import { IUserService } from "../../../application/services/user/IUserService";
+import { ControlledError } from "../../../domain/errors/ControlledError";
 import {ErrorResponseDTO} from "../dto/Error";
 import {UserDTO} from "../dto/UserDTO";
 
-jest.mock("../../application/services/User/IUserService");
+jest.mock("../../../application/services/user/IUserService");
 
 let mockUserService: jest.Mocked<IUserService>;
 let app: any;
 
 beforeAll(async () => {
-    jest.doMock("../../application/services/User/IUserService", () => {
+    jest.doMock("../../../application/services/user/IUserService", () => {
         return {
             createUser: jest.fn(),
             updateBalance: jest.fn(),
         };
     });
 
-    mockUserService = require("../../application/services/User/IUserService");
+    mockUserService = require("../../../application/services/user/IUserService");
 
     container.registerInstance<IUserService>("IUserService", mockUserService);
 
-    const { app: importedApp } = await import("../../index");
+    const { app: importedApp } = await import("../../../index");
     app = importedApp;
 });
 
