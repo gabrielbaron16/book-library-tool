@@ -43,4 +43,15 @@ export class MongoReservationRepository implements IReservationRepository {
         const totalRecords = await ReservationModel.countDocuments({ bookId }).exec();
         return { reservations, totalRecords };
     }
+
+    async findDueReservations(dueSoonDate: Date): Promise<Reservation[]> {
+        const query = {
+            isReturned: false,
+            $or: [
+                { returnDate: { $gte: dueSoonDate } }
+            ]
+        };
+
+        return await ReservationModel.find(query).exec();
+    }
 }

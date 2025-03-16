@@ -12,6 +12,8 @@ import {IReservationRepository} from "../domain/repositories/IReservationReposit
 import {IReservationService} from "../application/services/reservation/IReservationService";
 import {MongoReservationRepository} from "../infrastructure/repositories/MongoReservationRepository";
 import {ReservationService} from "../application/services/reservation/ReservationService";
+import {IEmailService} from "../domain/email/IEmailService";
+import {EmailService} from "../infrastructure/email/EmailService";
 
 container.register<IBookRepository>("IBookRepository", { useClass: MongoBookRepository });
 container.register<IBookService>("IBookService", { useClass: BookService });
@@ -21,6 +23,8 @@ container.register<IUserService>("IUserService", { useClass: UserService });
 
 container.register<IReservationRepository>("IReservationRepository", { useClass: MongoReservationRepository });
 container.register<IReservationService>("IReservationService", { useClass: ReservationService });
+
+container.register<IEmailService>("IEmailService", { useClass: EmailService });
 
 
 export { container };

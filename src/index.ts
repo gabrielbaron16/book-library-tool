@@ -8,6 +8,7 @@ import fs from "fs";
 import yaml from "js-yaml";
 import dotenv from "dotenv";
 import router from "./config/routes";
+import {ReminderJob} from "./presentation/jobs/ReminderJob";
 
 
 dotenv.config();
@@ -46,6 +47,7 @@ app.use(errorHandler);
 
 if (require.main === module) {
     connectDB().then(() => {
+        ReminderJob.startJobs();
         app.listen(PORT, () => {
             console.log(`Server running on http://localhost:${PORT}`);
         });

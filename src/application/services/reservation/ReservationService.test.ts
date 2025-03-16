@@ -6,6 +6,8 @@ import {IUserRepository} from "../../../domain/repositories/IUserRepository";
 import {Reservation} from "../../../domain/entities/Reservation";
 import {ControlledError} from "../../../domain/errors/ControlledError";
 import {container} from "tsyringe";
+import {IEmailService} from "../../../domain/email/IEmailService";
+import {Book} from "../../../domain/entities/Book";
 
 jest.mock("../../../domain/repositories/IBookRepository");
 jest.mock("../../../domain/repositories/IReservationRepository");
@@ -15,6 +17,7 @@ let reservationService: ReservationService;
 let mockBookRepository: jest.Mocked<IBookRepository>;
 let mockReservationRepository: jest.Mocked<IReservationRepository>;
 let mockUserRepository: jest.Mocked<IUserRepository>;
+let mockEmailService: jest.Mocked<IEmailService>
 
 beforeEach(() => {
     jest.doMock("../../../domain/repositories/IBookRepository", () => {
@@ -31,18 +34,26 @@ beforeEach(() => {
     });
     jest.doMock("../../../domain/repositories/IReservationRepository", () => {
         return {
+            save: jest.fn(),
             findByBookId: jest.fn(),
-
+            findDueReservations: jest.fn(),
+        };
+    });
+    jest.doMock("../../../domain/email/IEmailService", () => {
+        return {
+            sendEmail: jest.fn(),
         };
     });
 
     mockBookRepository = require("../../../domain/repositories/IBookRepository")
     mockUserRepository = require("../../../domain/repositories/IUserRepository");
     mockReservationRepository = require("../../../domain/repositories/IReservationRepository");
+    mockEmailService = require("../../../domain/email/IEmailService");
 
     container.registerInstance<IBookRepository>("IBookRepository", mockBookRepository);
     container.registerInstance<IReservationRepository>("IReservationRepository", mockReservationRepository);
     container.registerInstance<IUserRepository>("IUserRepository", mockUserRepository);
+    container.registerInstance<IEmailService>("IEmailService", mockEmailService);
 
     reservationService = container.resolve(ReservationService);
 
@@ -64,7 +75,7 @@ describe("createReservation Service", () => {
             isReturned: false
         };
 
-        mockBookRepository.findById.mockResolvedValue({bookId: "3425345HCG", stock: 10} as any);
+        mockBookRepository.findById.mockResolvedValue({bookId: "3425345HCG", stock: 10} as Book);
         mockUserRepository.exists.mockResolvedValue(true);
         mockUserRepository.getBalance.mockResolvedValue(10);
         mockReservationRepository.save.mockResolvedValue(true);
@@ -170,5 +181,41 @@ describe("getReservationsByBookId Service", () => {
 
         expect(result).toEqual({ reservations: [], totalRecords: 0 });
         expect(mockReservationRepository.findByBookId).toHaveBeenCalledWith("214235l12", 0, 10);
+    });
+});
+
+describe("notifyUpcomingDueDate Service", () => {
+    it("should send reminder emails for due reservations", async () => {
+        const reservations: Reservation[] = [
+            { bookId: "342352FT", userEmail: "carmsoprano@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false },
+            { bookId: "342352FT", userEmail: "medowsoprano@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false }
+        ];
+
+        mockReservationRepository.findDueReservations.mockResolvedValue(reservations);
+        mockBookRepository.findById.mockResolvedValue({bookId: "342352FT", title: "Don Quijote"} as Book);
+        mockEmailService.sendEmail.mockResolvedValue(undefined);
+
+        await reservationService.notifyUpcomingDueDate();
+
+        expect(mockReservationRepository.findDueReservations).toHaveBeenCalled();
+        expect(mockBookRepository.findById).toHaveBeenCalledTimes(reservations.length);
+        expect(mockEmailService.sendEmail).toHaveBeenCalledTimes(reservations.length);
+        reservations.forEach(reservation => {
+            expect(mockEmailService.sendEmail).toHaveBeenCalledWith(
+                reservation.userEmail,
+                "Return Reminder",
+                expect.stringContaining("Don Quijote")
+            );
+        });
+    });
+
+    it("should handle no due reservations", async () => {
+        mockReservationRepository.findDueReservations.mockResolvedValue([]);
+
+        await reservationService.notifyUpcomingDueDate();
+
+        expect(mockReservationRepository.findDueReservations).toHaveBeenCalled();
+        expect(mockBookRepository.findById).not.toHaveBeenCalled();
+        expect(mockEmailService.sendEmail).not.toHaveBeenCalled();
     });
 });
