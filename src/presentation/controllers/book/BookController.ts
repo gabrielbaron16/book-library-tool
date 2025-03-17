@@ -20,7 +20,8 @@ export const getBookById = async (req: Request, res: Response) => {
             res.status(404).send(errorResponse);
             return;
         }
-        res.status(200).send(book);
+        const bookDTO = mapBookToBookDto(book)
+        res.status(200).send(bookDTO);
     } catch (e) {
         logger.error({err: e}, "Unexpected error fetching book information");
         const errorResponse: ErrorResponseDTO = {

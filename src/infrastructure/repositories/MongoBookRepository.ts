@@ -9,7 +9,7 @@ export class MongoBookRepository implements IBookRepository {
 
     async findById(bookId: string): Promise<Book | null> {
         const doc = await BookModel.findOne({bookId}).lean();
-        return doc ? this.mapDocumentToBook(doc) : null;
+        return doc ? doc : null;
     }
 
     async findByFilters(skip: number, limit: number, title?: string, author?: string, publicationYear?: number): Promise<{
@@ -23,8 +23,7 @@ export class MongoBookRepository implements IBookRepository {
 
         try {
             const totalRecords = await BookModel.countDocuments(query);
-            const docs = await BookModel.find(query).skip(skip).limit(limit).lean();
-            const books = docs.map(this.mapDocumentToBook);
+            const books = await BookModel.find(query).skip(skip).limit(limit).lean();
             return {books, totalRecords};
         } catch (error) {
             logger.error({ err: error },"Error finding books:");
@@ -49,17 +48,5 @@ export class MongoBookRepository implements IBookRepository {
 
     async exists(bookId: string): Promise<boolean> {
         return await BookModel.exists({bookId}) !== null;
-    }
-
-    private mapDocumentToBook(doc: any): Book {
-        return {
-            bookId: doc.bookId,
-            title: doc.title,
-            author: doc.author,
-            publicationYear: doc.publicationYear,
-            publisher: doc.publisher,
-            price: doc.price,
-            stock: doc.stock
-        };
     }
 }
