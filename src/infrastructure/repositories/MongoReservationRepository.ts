@@ -73,12 +73,10 @@ export class MongoReservationRepository implements IReservationRepository {
         };
     }
 
-    async findDueReservations(dueSoonDate: Date): Promise<Reservation[]> {
+    async findDueReservations(startDate: Date, endDate: Date): Promise<Reservation[]> {
         const query = {
             isReturned: false,
-            $or: [
-                {returnDate: {$gte: dueSoonDate}}
-            ]
+            returnDate: { $gte: startDate, $lte: endDate }
         };
 
         const reservations = await ReservationModel.find(query).lean();

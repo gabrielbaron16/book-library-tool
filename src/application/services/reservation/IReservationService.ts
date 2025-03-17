@@ -10,5 +10,7 @@ export interface IReservationService {
 
     notifyUpcomingDueDate(): Promise<void>;
 
+    notifyLateReturns(): Promise<void>;
+
     finishReservation(reservationId: string): Promise<boolean>;
 }

@@ -7,9 +7,18 @@ export class ReminderJob {
     static startJobs() {
         const reservationService = container.resolve<IReservationService>("IReservationService");
 
-        cron.schedule("*/2 * * * *", async () => {
+        cron.schedule("*/1 * * * *", async () => {
             logger.info("Executing job for reminder emails...");
-            await reservationService.notifyUpcomingDueDate();
+            const results = await Promise.allSettled([
+                reservationService.notifyUpcomingDueDate(),
+                reservationService.notifyLateReturns()
+            ]);
+
+            results.forEach((result, index) => {
+                if (result.status === "rejected") {
+                    logger.error(`Error in job ${index + 1}:`, result.reason);
+                }
+            });
         });
     }
 }

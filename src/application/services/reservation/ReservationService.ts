@@ -8,7 +8,8 @@ import {ControlledError} from "../../../domain/errors/ControlledError";
 import {IEmailService} from "../../../domain/email/IEmailService";
 
 const RESERVATION_COST = 3;
-const DAYS_BEFORE_DUE_DATE = 2
+const DAYS_BEFORE_DUE_DATE = 2;
+const DAYS_AFTER_DUE_DATE = 3
 const CHUNK_SIZE = 10;
 
 @injectable()
@@ -55,10 +56,14 @@ export class ReservationService implements IReservationService {
     }
 
     async notifyUpcomingDueDate(): Promise<void> {
-        const remindDate = new Date();
-        remindDate.setDate(remindDate.getDate() + DAYS_BEFORE_DUE_DATE);
+        const today = new Date();
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() + DAYS_BEFORE_DUE_DATE);
 
-        const reservations = await this.reservationRepository.findDueReservations(remindDate);
+        const endDate = new Date(startDate);
+        endDate.setHours(23, 59, 59, 999);
+
+        const reservations = await this.reservationRepository.findDueReservations(startDate, endDate);
 
         for (let i = 0; i < reservations.length; i += CHUNK_SIZE) {
             const chunk = reservations.slice(i, i + CHUNK_SIZE);
@@ -69,7 +74,37 @@ export class ReservationService implements IReservationService {
                     if (book) {
                         const subject = "Return Reminder";
                         const text = `Hi, remember to return the book ${book.title} to the library. 
-                        Your due date is ${reservation.returnDate.toISOString()}.`;
+                    Your due date is ${reservation.returnDate.toISOString()}.`;
+
+                        return this.emailService.sendEmail(reservation.userEmail, subject, text);
+                    }
+                } catch (error) {
+                    console.error(`Error processing reservation ${reservation.bookId}:`, error);
+                }
+            }));
+        }
+    }
+
+    async notifyLateReturns(): Promise<void> {
+        const today = new Date();
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - DAYS_AFTER_DUE_DATE);
+
+        const endDate = new Date(today);
+        endDate.setHours(23, 59, 59, 999);
+
+        const reservations = await this.reservationRepository.findDueReservations(startDate, endDate);
+
+        for (let i = 0; i < reservations.length; i += CHUNK_SIZE) {
+            const chunk = reservations.slice(i, i + CHUNK_SIZE);
+
+            await Promise.all(chunk.map(async (reservation) => {
+                try {
+                    const book = await this.bookRepository.findById(reservation.bookId);
+                    if (book) {
+                        const subject = "Late Return Reminder";
+                        const text = `Hi, remember to return the book ${book.title} to the library. 
+                    Your due date was ${reservation.returnDate.toISOString()}.`;
 
                         return this.emailService.sendEmail(reservation.userEmail, subject, text);
                     }
