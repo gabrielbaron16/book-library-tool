@@ -72,3 +72,32 @@ export const getReservationsByBookId = async (req: Request, res: Response) => {
         res.status(500).send(errorResponse);
     }
 }
+
+export const finishReservation = async (req: Request, res: Response) => {
+    const {id} = req.params;
+    try {
+        const result = await reservationService.finishReservation(id);
+        if (result){
+            res.status(200).end();
+        } else {
+            const errorResponse: ErrorResponseDTO = {
+                message: "Reservation does not exists"
+            };
+            res.status(404).send(errorResponse);
+        }
+    } catch (e) {
+        let errorResponse: ErrorResponseDTO;
+        if (e instanceof ControlledError) {
+            errorResponse = {
+                message: e.message
+            };
+            res.status(400).send(errorResponse);
+        } else {
+            logger.error({err: e}, "Unexpected error finishing the reservation");
+            errorResponse = {
+                message: "Unexpected error finishing the reservation"
+            };
+            res.status(500).send(errorResponse);
+        }
+    }
+}

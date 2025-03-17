@@ -37,6 +37,8 @@ beforeEach(() => {
             save: jest.fn(),
             findByBookId: jest.fn(),
             findDueReservations: jest.fn(),
+            findById: jest.fn(),
+            finishReservation: jest.fn(),
         };
     });
     jest.doMock("../../../domain/email/IEmailService", () => {
@@ -164,7 +166,7 @@ describe("createReservation Service", () => {
 describe("getReservationsByBookId Service", () => {
     it("should return reservations and total records for a valid bookId", async () => {
         const reservations: Reservation[] = [
-            { bookId: "214235l12", userEmail: "bernal@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false },
+            { id: "4534546yyut-hhk", bookId: "214235l12", userEmail: "bernal@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false },
         ];
         mockReservationRepository.findByBookId.mockResolvedValue({ reservations, totalRecords: 1 });
 
@@ -187,8 +189,8 @@ describe("getReservationsByBookId Service", () => {
 describe("notifyUpcomingDueDate Service", () => {
     it("should send reminder emails for due reservations", async () => {
         const reservations: Reservation[] = [
-            { bookId: "342352FT", userEmail: "carmsoprano@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false },
-            { bookId: "342352FT", userEmail: "medowsoprano@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false }
+            { id: "4534546yyut-hhk", bookId: "342352FT", userEmail: "carmsoprano@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false },
+            { id: "4534546yyut-hjk", bookId: "342352FT", userEmail: "medowsoprano@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false }
         ];
 
         mockReservationRepository.findDueReservations.mockResolvedValue(reservations);
@@ -217,5 +219,60 @@ describe("notifyUpcomingDueDate Service", () => {
         expect(mockReservationRepository.findDueReservations).toHaveBeenCalled();
         expect(mockBookRepository.findById).not.toHaveBeenCalled();
         expect(mockEmailService.sendEmail).not.toHaveBeenCalled();
+    });
+});
+
+describe("finishReservation Service", () => {
+    it("should finish a reservation successfully", async () => {
+        const reservation: Reservation = {
+            id: "1236456457-dgdf",
+            bookId: "3425345HCG",
+            userEmail: "peterrusso@gmail.com",
+            bookCount: 1,
+            returnDate: new Date(),
+            reservationDate: new Date(),
+            isReturned: false
+        };
+
+        mockReservationRepository.findById.mockResolvedValue(reservation);
+        mockReservationRepository.finishReservation.mockResolvedValue();
+
+        const result = await reservationService.finishReservation("1236456457-dgdf");
+
+        expect(result).toBe(true);
+        expect(mockReservationRepository.findById).toHaveBeenCalledWith("1236456457-dgdf");
+        expect(mockReservationRepository.finishReservation).toHaveBeenCalledWith(reservation, expect.any(Date));
+    });
+
+    it("should return false if the reservation is not found", async () => {
+        mockReservationRepository.findById.mockResolvedValue(null);
+
+        const result = await reservationService.finishReservation("1236456457-dgdf");
+
+        expect(result).toBe(false);
+
+        expect(mockReservationRepository.findById).toHaveBeenCalledWith("1236456457-dgdf");
+        expect(mockReservationRepository.finishReservation).not.toHaveBeenCalled();
+    });
+
+    it("should throw an error if the reservation is finished", async () => {
+        const reservation: Reservation = {
+            id: "1236456457-dgdf",
+            bookId: "3425345HCG",
+            userEmail: "peterrusso@gmail.com",
+            bookCount: 1,
+            returnDate: new Date(),
+            reservationDate: new Date(),
+            isReturned: true
+        };
+
+        mockReservationRepository.findById.mockResolvedValue(reservation);
+
+        await expect(reservationService.finishReservation("1236456457-dgdf")).rejects.toThrow(
+            new ControlledError("Reservation with ID 1236456457-dgdf is already finished.")
+        );
+
+        expect(mockReservationRepository.findById).toHaveBeenCalledWith("1236456457-dgdf");
+        expect(mockReservationRepository.finishReservation).not.toHaveBeenCalled();
     });
 });

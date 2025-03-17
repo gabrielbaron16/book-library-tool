@@ -94,7 +94,7 @@ describe("PATCH /users/:email/balance", () => {
 
         const response = await request(app).patch("/users/richardgasquet@gmail.com/balance").send(body);
 
-        expect(response.status).toBe(204);
+        expect(response.status).toBe(200);
     });
 
     it("should return 204 because there's no user with that email", async () => {

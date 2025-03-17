@@ -1,7 +1,14 @@
-import { Reservation } from "../../../domain/entities/Reservation";
+import {Reservation} from "../../../domain/entities/Reservation";
 
 export interface IReservationService {
     createReservation(reservation: Reservation): Promise<void>;
-    getReservationsByBookId(bookId: string, page: number, limit: number): Promise<{ reservations: Reservation[], totalRecords: number }>;
+
+    getReservationsByBookId(bookId: string, page: number, limit: number): Promise<{
+        reservations: Reservation[],
+        totalRecords: number
+    }>;
+
     notifyUpcomingDueDate(): Promise<void>;
+
+    finishReservation(reservationId: string): Promise<boolean>;
 }

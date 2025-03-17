@@ -1,7 +1,11 @@
 import { Router } from "express";
 import {addBook, deleteBookById, getBookById, searchBooks} from "../presentation/controllers/book/BookController";
 import {addUser, updateUserBalance} from "../presentation/controllers/user/UserController";
-import {addReservation, getReservationsByBookId} from "../presentation/controllers/reservation/ReservationController";
+import {
+    addReservation,
+    finishReservation,
+    getReservationsByBookId
+} from "../presentation/controllers/reservation/ReservationController";
 
 const router = Router();
 
@@ -15,5 +19,6 @@ router.patch("/users/:email/balance", updateUserBalance);
 
 router.post("/reservations", addReservation);
 router.get("/reservations/book/:bookId", getReservationsByBookId);
+router.patch("/reservations/finish/:id", finishReservation);
 
 export default router;

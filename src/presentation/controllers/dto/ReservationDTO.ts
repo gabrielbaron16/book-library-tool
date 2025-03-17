@@ -5,6 +5,8 @@ export class ReservationDTO {
         public bookCount: number,
         public returnDate: Date,
         public reservationDate?: Date,
-        public isReturned?: boolean
+        public isReturned?: boolean,
+        public id?: string,
+        public realReturnDate?: Date
     ) {}
 }

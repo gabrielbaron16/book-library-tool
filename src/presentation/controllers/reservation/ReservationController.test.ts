@@ -17,6 +17,7 @@ beforeAll(async () => {
         return {
             createReservation: jest.fn(),
             getReservationsByBookId: jest.fn(),
+            finishReservation: jest.fn(),
         };
     });
 
@@ -161,5 +162,25 @@ describe("GET /reservations/book/:bookId", () => {
         expect(response.status).toBe(500);
         expect(response.body).toEqual(errorResponse);
         expect(mockReservationService.getReservationsByBookId).toHaveBeenCalledWith("1354534HGA", 1, 10);
+    });
+});
+
+describe("PATCH /reservations/finish/:id", () => {
+    it("should return 200", async () => {
+        mockReservationService.finishReservation.mockResolvedValue(true);
+
+        const response = await request(app).patch("/reservations/finish/334534645-ER");
+
+        expect(response.status).toBe(200);
+        expect(mockReservationService.finishReservation).toHaveBeenCalledWith("334534645-ER");
+    });
+
+    it("should return 404 if reservation does not exists", async () => {
+        mockReservationService.finishReservation.mockResolvedValue(false);
+
+        const response = await request(app).patch("/reservations/finish/334534645-ER");
+
+        expect(response.status).toBe(404);
+        expect(mockReservationService.finishReservation).toHaveBeenCalledWith("334534645-ER");
     });
 });

@@ -44,7 +44,7 @@ export const updateUserBalance = async (req: Request, res: Response) => {
             res.status(404).send(errorResponse);
             return;
         }
-        res.status(204).end();
+        res.status(200).end();
     } catch (e) {
         logger.error({err: e}, "Unexpected error updating user balance");
         const errorResponse: ErrorResponseDTO = {

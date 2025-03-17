@@ -1,8 +1,18 @@
-import { Reservation } from "../entities/Reservation";
+import {Reservation} from "../entities/Reservation";
 
 export interface IReservationRepository {
+    findById(reservationId: string): Promise<Reservation | null>;
+
     save(reservation: Reservation): Promise<boolean>;
+
     findActiveByBookId(bookId: string): Promise<Reservation[]>;
-    findByBookId(bookId: string, offset: number, limit: number): Promise<{ reservations: Reservation[], totalRecords: number }>;
+
+    findByBookId(bookId: string, offset: number, limit: number): Promise<{
+        reservations: Reservation[],
+        totalRecords: number
+    }>;
+
     findDueReservations(dueSoonDate: Date): Promise<Reservation[]>;
+
+    finishReservation(reservation: Reservation, realReturnDate: Date): Promise<void>;
 }

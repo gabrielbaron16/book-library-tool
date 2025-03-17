@@ -425,6 +425,56 @@ paths:
                   value:
                     message: "Unexpected error occurred"
                     code: 500
+  /reservations/finish/{id}:
+    patch:
+      tags:
+        - Reservations
+      summary: Return a book from specific reservation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Reservation Finished
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Invalid request example
+                  value:
+                    message: "Invalid input data"
+                    code: 400
+        "404":
+          description: Reservation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Reservation not found example
+                  value:
+                    message: "Reservation not found"
+                    code: 404
+        "500":
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Unexpected error example
+                  value:
+                    message: "Unexpected error occurred"
+                    code: 500
   /reservations/book/{bookId}:
     get:
       tags:
@@ -574,6 +624,9 @@ components:
         - bookCount
         - returnDate
       properties:
+        id:
+          type: string
+          readOnly: true
         userEmail:
           type: string
         bookId:
@@ -591,4 +644,8 @@ components:
           readOnly: true
         isReturned:
           type: boolean
+          readOnly: true
+        realReturnDate:
+          type: string
+          format: date-time
           readOnly: true

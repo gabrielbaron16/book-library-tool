@@ -18,7 +18,8 @@ export class ReservationService implements IReservationService {
         @inject("IBookRepository") private bookRepository: IBookRepository,
         @inject("IUserRepository") private userRepository: IUserRepository,
         @inject("IEmailService") private emailService: IEmailService
-    ) {}
+    ) {
+    }
 
     async createReservation(reservation: Reservation): Promise<void> {
         const book = await this.bookRepository.findById(reservation.bookId);
@@ -45,7 +46,10 @@ export class ReservationService implements IReservationService {
         await this.userRepository.updateBalance(reservation.userEmail, newBalance);
     }
 
-    async getReservationsByBookId(bookId: string, page: number, limit: number): Promise<{ reservations: Reservation[], totalRecords: number }> {
+    async getReservationsByBookId(bookId: string, page: number, limit: number): Promise<{
+        reservations: Reservation[],
+        totalRecords: number
+    }> {
         const offset = (page - 1) * limit;
         return this.reservationRepository.findByBookId(bookId, offset, limit);
     }
@@ -60,7 +64,7 @@ export class ReservationService implements IReservationService {
             const chunk = reservations.slice(i, i + CHUNK_SIZE);
 
             await Promise.all(chunk.map(async (reservation) => {
-                try{
+                try {
                     const book = await this.bookRepository.findById(reservation.bookId);
                     if (book) {
                         const subject = "Return Reminder";
@@ -74,5 +78,17 @@ export class ReservationService implements IReservationService {
                 }
             }));
         }
+    }
+
+    async finishReservation(reservationId: string): Promise<boolean> {
+        const reservation = await this.reservationRepository.findById(reservationId);
+        if (!reservation){
+            return false
+        }
+        if (reservation.isReturned){
+            throw new ControlledError(`Reservation with ID ${reservationId} is already finished.`);
+        }
+        await this.reservationRepository.finishReservation(reservation, new Date());
+        return true
     }
 }
