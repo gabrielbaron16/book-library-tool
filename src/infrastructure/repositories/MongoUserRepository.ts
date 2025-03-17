@@ -12,7 +12,7 @@ export class MongoUserRepository implements IUserRepository {
             await newUser.save();
             logger.debug("User saved successfully:", user);
         } catch (error) {
-            logger.error("Error saving user:", error);
+            logger.error({ err: error },"Error saving user:");
             throw error;
         }
     }

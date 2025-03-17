@@ -1,18 +1,24 @@
-import { injectable, inject } from "tsyringe";
-import { IBookService } from "./IBookService";
-import { IBookRepository } from "../../../domain/repositories/IBookRepository";
-import { Book } from "../../../domain/entities/Book";
+import {injectable, inject} from "tsyringe";
+import {IBookService} from "./IBookService";
+import {IBookRepository} from "../../../domain/repositories/IBookRepository";
+import {Book} from "../../../domain/entities/Book";
 import {ControlledError} from "../../../domain/errors/ControlledError";
+import {IReservationRepository} from "../../../domain/repositories/IReservationRepository";
 
 @injectable()
 export class BookService implements IBookService {
-    constructor(@inject("IBookRepository") private bookRepository: IBookRepository) {}
+    constructor(@inject("IBookRepository") private bookRepository: IBookRepository,
+                @inject("IReservationRepository") private reservationRepository: IReservationRepository) {
+    }
 
     async getBookById(id: string): Promise<Book | null> {
         return await this.bookRepository.findById(id);
     }
 
-    async searchBooks(page: number, limit: number, title?: string, author?: string, publicationYear?: number): Promise<{ books: Book[], totalRecords: number }> {
+    async searchBooks(page: number, limit: number, title?: string, author?: string, publicationYear?: number): Promise<{
+        books: Book[],
+        totalRecords: number
+    }> {
         const skip = (page - 1) * limit;
         return this.bookRepository.findByFilters(skip, limit, title, author, publicationYear);
     }
@@ -26,6 +32,10 @@ export class BookService implements IBookService {
     }
 
     async deleteBook(id: string): Promise<boolean> {
+        const activeReservations = await this.reservationRepository.findActiveByBookId(id);
+        if (activeReservations && activeReservations.length > 0) {
+            throw new ControlledError(`Book with ID ${id} has active reservations, can't be deleted.`);
+        }
         return await this.bookRepository.delete(id);
     }
 }

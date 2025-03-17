@@ -1,8 +1,8 @@
 import "reflect-metadata";
 import "./config/container";
-import express, { Request, Response, NextFunction, ErrorRequestHandler } from "express";
-import { middleware as OpenApiValidatorMiddleware } from "express-openapi-validator";
-import { connectDB } from "./config/database";
+import express, {Request, Response, NextFunction, ErrorRequestHandler} from "express";
+import {middleware as OpenApiValidatorMiddleware} from "express-openapi-validator";
+import {connectDB} from "./config/database";
 import swaggerUi from "swagger-ui-express";
 import fs from "fs";
 import yaml from "js-yaml";
@@ -39,7 +39,7 @@ const errorHandler: ErrorRequestHandler = (
     next: NextFunction
 ): void => {
     if (err.status === 400) {
-        res.status(400).json({ message: err.message, errors: err.errors });
+        res.status(400).json({message: err.message, errors: err.errors});
         return;
     }
     next(err);
@@ -53,8 +53,8 @@ if (require.main === module) {
             logger.info("Application started successfully!");
         });
     }).catch((err) => {
-        logger.error("failed to start server due to DB error:", err);
+        logger.error({err: err}, "failed to start server due to DB error:");
     });
 }
 
-export { app };
+export {app};

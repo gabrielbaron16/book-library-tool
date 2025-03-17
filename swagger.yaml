@@ -124,6 +124,18 @@ paths:
       responses:
         "200":
           description: Book deleted
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                example-1:
+                  summary: Invalid request example
+                  value:
+                    message: "Invalid input data"
+                    code: 400
         "404":
           description: Book not found
           content:

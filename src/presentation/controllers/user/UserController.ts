@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
-import { container } from "../../../config/container";
-import { IUserService } from "../../../application/services/user/IUserService";
-import { UserDTO } from "../dto/UserDTO";
-import { mapUserDtoToUser } from "../../../domain/mappers/UserMappers";
-import { ErrorResponseDTO } from "../dto/Error";
-import { ControlledError } from "../../../domain/errors/ControlledError";
+import {Request, Response} from "express";
+import {container} from "../../../config/container";
+import {IUserService} from "../../../application/services/user/IUserService";
+import {UserDTO} from "../dto/UserDTO";
+import {mapUserDtoToUser} from "../../../domain/mappers/UserMappers";
+import {ErrorResponseDTO} from "../dto/Error";
+import {ControlledError} from "../../../domain/errors/ControlledError";
 import logger from "../../../config/logger";
 
 const userService = container.resolve<IUserService>("IUserService");
@@ -23,7 +23,7 @@ export const addUser = async (req: Request, res: Response) => {
             };
             res.status(400).send(errorResponse);
         } else {
-            logger.error("Unexpected error adding a new user", e);
+            logger.error({err: e}, "Unexpected error adding a new user");
             errorResponse = {
                 message: "Unexpected error adding a new user"
             };
@@ -33,8 +33,8 @@ export const addUser = async (req: Request, res: Response) => {
 };
 
 export const updateUserBalance = async (req: Request, res: Response) => {
-    const { email } = req.params;
-    const { balance } = req.body;
+    const {email} = req.params;
+    const {balance} = req.body;
     try {
         const updated = await userService.updateBalance(email, balance);
         if (!updated) {
@@ -46,7 +46,7 @@ export const updateUserBalance = async (req: Request, res: Response) => {
         }
         res.status(204).end();
     } catch (e) {
-        logger.error("Unexpected error updating user balance", e);
+        logger.error({err: e}, "Unexpected error updating user balance");
         const errorResponse: ErrorResponseDTO = {
             message: "Unexpected error updating user balance"
         };

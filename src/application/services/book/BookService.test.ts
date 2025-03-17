@@ -4,11 +4,14 @@ import {container} from "tsyringe";
 import {IBookRepository} from "../../../domain/repositories/IBookRepository";
 import {Book} from "../../../domain/entities/Book";
 import {ControlledError} from "../../../domain/errors/ControlledError";
+import {IReservationRepository} from "../../../domain/repositories/IReservationRepository";
+import {Reservation} from "../../../domain/entities/Reservation";
 
 jest.mock("../../../domain/repositories/IBookRepository");
 
 let bookService: BookService;
 let mockBookRepository: jest.Mocked<IBookRepository>;
+let mockReservationRepository: jest.Mocked<IReservationRepository>;
 
 beforeEach(() => {
     jest.doMock("../../../domain/repositories/IBookRepository", () => {
@@ -20,10 +23,17 @@ beforeEach(() => {
             exists: jest.fn()
         };
     });
+    jest.doMock("../../../domain/repositories/IReservationRepository", () => {
+        return {
+            findActiveByBookId: jest.fn()
+        };
+    });
 
-    mockBookRepository = require("../../../domain/repositories/IBookRepository")
+    mockBookRepository = require("../../../domain/repositories/IBookRepository");
+    mockReservationRepository = require("../../../domain/repositories/IReservationRepository");
 
     container.registerInstance<IBookRepository>("IBookRepository", mockBookRepository);
+    container.registerInstance<IReservationRepository>("IReservationRepository", mockReservationRepository);
 
     bookService = container.resolve(BookService);
 
@@ -119,6 +129,7 @@ describe("BookService", () => {
     });
 
     it("should delete a book by ID", async () => {
+        mockReservationRepository.findActiveByBookId.mockResolvedValue([]);
         mockBookRepository.delete.mockResolvedValue(true);
 
         const result = await bookService.deleteBook("342535HD1");
@@ -126,4 +137,16 @@ describe("BookService", () => {
         expect(result).toBe(true);
         expect(mockBookRepository.delete).toHaveBeenCalledWith("342535HD1");
     });
+
+    it("should thrown a error if book has activeReservations", async () => {
+        const reservations: Reservation[] = [
+            { bookId: "342535HD1", userEmail: "bernal@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false },
+        ];
+        mockReservationRepository.findActiveByBookId.mockResolvedValue(reservations);
+
+        await expect( bookService.deleteBook("342535HD1")).rejects.toThrow(
+            new ControlledError("Book with ID 342535HD1 has active reservations, can't be deleted.")
+        );
+    });
+
 });

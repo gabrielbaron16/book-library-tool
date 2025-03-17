@@ -1,18 +1,21 @@
-import { injectable } from "tsyringe";
-import { IBookRepository } from "../../domain/repositories/IBookRepository";
-import { Book } from "../../domain/entities/Book";
-import { BookModel } from "../models/BookModel";
+import {injectable} from "tsyringe";
+import {IBookRepository} from "../../domain/repositories/IBookRepository";
+import {Book} from "../../domain/entities/Book";
+import {BookModel} from "../models/BookModel";
 import logger from "../../config/logger";
 
 @injectable()
 export class MongoBookRepository implements IBookRepository {
 
     async findById(bookId: string): Promise<Book | null> {
-        const doc = await BookModel.findOne({ bookId }).lean();
+        const doc = await BookModel.findOne({bookId}).lean();
         return doc ? this.mapDocumentToBook(doc) : null;
     }
 
-    async findByFilters(skip: number, limit: number, title?: string, author?: string, publicationYear?: number): Promise<{ books: Book[], totalRecords: number }> {
+    async findByFilters(skip: number, limit: number, title?: string, author?: string, publicationYear?: number): Promise<{
+        books: Book[],
+        totalRecords: number
+    }> {
         const query: any = {};
         if (title) query.title = title;
         if (author) query.author = author;
@@ -22,9 +25,9 @@ export class MongoBookRepository implements IBookRepository {
             const totalRecords = await BookModel.countDocuments(query);
             const docs = await BookModel.find(query).skip(skip).limit(limit).lean();
             const books = docs.map(this.mapDocumentToBook);
-            return { books, totalRecords };
+            return {books, totalRecords};
         } catch (error) {
-            console.error("Error finding books:", error);
+            logger.error({ err: error },"Error finding books:");
             throw error;
         }
     }
@@ -34,18 +37,18 @@ export class MongoBookRepository implements IBookRepository {
             await BookModel.create(book);
             logger.debug("Book saved successfully:", book);
         } catch (error) {
-            logger.error("Error saving book:", error);
+            logger.error({err: error}, "Error saving book:");
             throw error;
         }
     }
 
     async delete(bookId: string): Promise<boolean> {
-        const result = await BookModel.deleteOne({ bookId });
+        const result = await BookModel.deleteOne({bookId});
         return result.deletedCount > 0;
     }
 
     async exists(bookId: string): Promise<boolean> {
-        return await BookModel.exists({ bookId }) !== null;
+        return await BookModel.exists({bookId}) !== null;
     }
 
     private mapDocumentToBook(doc: any): Book {

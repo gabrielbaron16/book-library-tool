@@ -1,16 +1,16 @@
-import { Request, Response } from "express";
-import { container } from "../../../config/container";
-import { IBookService } from "../../../application/services/book/IBookService";
-import { BookDTO } from "../dto/BookDTO";
-import { mapBookDtoToBook, mapBookToBookDto } from "../../../domain/mappers/BookMappers";
-import { ErrorResponseDTO } from "../dto/Error";
-import { ControlledError } from "../../../domain/errors/ControlledError";
+import {Request, Response} from "express";
+import {container} from "../../../config/container";
+import {IBookService} from "../../../application/services/book/IBookService";
+import {BookDTO} from "../dto/BookDTO";
+import {mapBookDtoToBook, mapBookToBookDto} from "../../../domain/mappers/BookMappers";
+import {ErrorResponseDTO} from "../dto/Error";
+import {ControlledError} from "../../../domain/errors/ControlledError";
 import logger from "../../../config/logger";
 
 const bookService = container.resolve<IBookService>("IBookService");
 
 export const getBookById = async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const {id} = req.params;
     try {
         const book = await bookService.getBookById(id);
         if (!book) {
@@ -22,7 +22,7 @@ export const getBookById = async (req: Request, res: Response) => {
         }
         res.status(200).send(book);
     } catch (e) {
-        logger.error("Unexpected error fetching book information", e);
+        logger.error({err: e}, "Unexpected error fetching book information");
         const errorResponse: ErrorResponseDTO = {
             message: "Unexpected error fetching book information"
         };
@@ -31,9 +31,9 @@ export const getBookById = async (req: Request, res: Response) => {
 };
 
 export const searchBooks = async (req: Request, res: Response) => {
-    const { title, author, publicationYear, page, limit } = req.query;
+    const {title, author, publicationYear, page, limit} = req.query;
     try {
-        const { books, totalRecords } = await bookService.searchBooks(
+        const {books, totalRecords} = await bookService.searchBooks(
             parseInt(page as string, 10),
             parseInt(limit as string, 10),
             title as string | undefined,
@@ -48,9 +48,9 @@ export const searchBooks = async (req: Request, res: Response) => {
             return;
         }
         const booksResponse = books.map(book => mapBookToBookDto(book));
-        res.status(200).send({ books: booksResponse, totalRecords });
+        res.status(200).send({books: booksResponse, totalRecords});
     } catch (e) {
-        logger.error("Unexpected error searching books", e);
+        logger.error({err: e}, "Unexpected error searching books");
         const errorResponse: ErrorResponseDTO = {
             message: "Unexpected error searching books"
         };
@@ -59,7 +59,7 @@ export const searchBooks = async (req: Request, res: Response) => {
 };
 
 export const addBook = async (req: Request, res: Response) => {
-    try{
+    try {
         const bookDTO: BookDTO = req.body;
         const newBook = mapBookDtoToBook(bookDTO);
         await bookService.createBook(newBook);
@@ -72,8 +72,8 @@ export const addBook = async (req: Request, res: Response) => {
             };
             res.status(400).send(errorResponse);
         } else {
-            logger.error("Unexpected error adding a new book", e);
-           errorResponse = {
+            logger.error({err: e}, "Unexpected error adding a new book");
+            errorResponse = {
                 message: "Unexpected error adding a new book"
             };
             res.status(500).send(errorResponse);
@@ -82,7 +82,7 @@ export const addBook = async (req: Request, res: Response) => {
 };
 
 export const deleteBookById = async (req: Request, res: Response) => {
-    const { id } = req.params;
+    const {id} = req.params;
     try {
         const deleted = await bookService.deleteBook(id);
         if (deleted) {
@@ -94,10 +94,18 @@ export const deleteBookById = async (req: Request, res: Response) => {
             res.status(404).send(errorResponse);
         }
     } catch (e) {
-        logger.error("Unexpected error deleting a book", e);
-        const errorResponse: ErrorResponseDTO = {
-            message: "Unexpected error deleting a book"
-        };
-        res.status(500).send(errorResponse);
+        let errorResponse: ErrorResponseDTO;
+        if (e instanceof ControlledError) {
+            errorResponse = {
+                message: e.message
+            };
+            res.status(400).send(errorResponse);
+        } else {
+            logger.error({err: e}, "Unexpected error deleting a book");
+            errorResponse = {
+                message: "Unexpected error deleting a book"
+            };
+            res.status(500).send(errorResponse);
+        }
     }
 };
