@@ -30,6 +30,14 @@ export class MongoUserRepository implements IUserRepository {
         return result.matchedCount > 0;
     }
 
+    async incrementBalance(email: string, amount: number): Promise<boolean> {
+        const result = await UserModel.updateOne(
+            { email },
+            {$inc: {balance: +amount}}
+        );
+        return result.matchedCount > 0;
+    }
+
     async exists(email: string): Promise<boolean> {
         return await UserModel.exists({ email }) !== null;
     }

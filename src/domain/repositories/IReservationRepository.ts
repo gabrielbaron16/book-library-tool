@@ -12,7 +12,9 @@ export interface IReservationRepository {
         totalRecords: number
     }>;
 
-    findDueReservations(startDate: Date, endDate: Date): Promise<Reservation[]>;
+    findDueReservations(startDate?: Date, endDate?: Date): Promise<Reservation[]>;
 
     finishReservation(reservation: Reservation, realReturnDate: Date): Promise<void>;
+
+    buyReservation(reservationId: string): Promise<void>;
 }

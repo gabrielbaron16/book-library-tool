@@ -8,7 +8,7 @@ import fs from "fs";
 import yaml from "js-yaml";
 import dotenv from "dotenv";
 import router from "./config/routes";
-import {ReminderJob} from "./presentation/jobs/ReminderJob";
+import {ScheduledJobs} from "./presentation/jobs/ScheduledJob";
 import logger from "./config/logger"
 
 
@@ -48,7 +48,7 @@ app.use(errorHandler);
 
 if (require.main === module) {
     connectDB().then(() => {
-        ReminderJob.startJobs();
+        ScheduledJobs.startJobs();
         app.listen(PORT, () => {
             logger.info("Application started successfully!");
         });

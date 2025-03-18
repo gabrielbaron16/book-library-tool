@@ -30,6 +30,7 @@ beforeEach(() => {
             exists: jest.fn(),
             getBalance: jest.fn(),
             updateBalance: jest.fn(),
+            incrementBalance: jest.fn(),
         };
     });
     jest.doMock("../../../domain/repositories/IReservationRepository", () => {
@@ -74,7 +75,8 @@ describe("createReservation Service", () => {
             bookCount: 1,
             returnDate: new Date(),
             reservationDate: new Date(),
-            isReturned: false
+            isReturned: false,
+            isBought: false
         };
 
         mockBookRepository.findById.mockResolvedValue({bookId: "3425345HCG", stock: 10} as Book);
@@ -99,7 +101,8 @@ describe("createReservation Service", () => {
             bookCount: 1,
             returnDate: new Date(),
             reservationDate: new Date(),
-            isReturned: false
+            isReturned: false,
+            isBought: false
         };
         mockBookRepository.findById.mockResolvedValue(null);
 
@@ -115,7 +118,8 @@ describe("createReservation Service", () => {
             bookCount: 1,
             returnDate: new Date(),
             reservationDate: new Date(),
-            isReturned: false
+            isReturned: false,
+            isBought: false
         };
 
         mockBookRepository.findById.mockResolvedValue({bookId: "3425345HCG", stock: 0} as any);
@@ -132,7 +136,8 @@ describe("createReservation Service", () => {
             bookCount: 1,
             returnDate: new Date(),
             reservationDate: new Date(),
-            isReturned: false
+            isReturned: false,
+            isBought: false
         };
 
         mockBookRepository.findById.mockResolvedValue({bookId: "3425345HCG", stock: 10} as any);
@@ -150,7 +155,8 @@ describe("createReservation Service", () => {
             bookCount: 1,
             returnDate: new Date(),
             reservationDate: new Date(),
-            isReturned: false
+            isReturned: false,
+            isBought: false
         };
 
         mockBookRepository.findById.mockResolvedValue({bookId: "3425345HCG", stock: 10} as any);
@@ -166,22 +172,31 @@ describe("createReservation Service", () => {
 describe("getReservationsByBookId Service", () => {
     it("should return reservations and total records for a valid bookId", async () => {
         const reservations: Reservation[] = [
-            { id: "4534546yyut-hhk", bookId: "214235l12", userEmail: "bernal@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false },
+            {
+                id: "4534546yyut-hhk",
+                bookId: "214235l12",
+                userEmail: "bernal@gmail.com",
+                bookCount: 1,
+                returnDate: new Date(),
+                reservationDate: new Date(),
+                isReturned: false,
+                isBought: false
+            },
         ];
-        mockReservationRepository.findByBookId.mockResolvedValue({ reservations, totalRecords: 1 });
+        mockReservationRepository.findByBookId.mockResolvedValue({reservations, totalRecords: 1});
 
         const result = await reservationService.getReservationsByBookId("214235l12", 1, 10);
 
-        expect(result).toEqual({ reservations, totalRecords: 1 });
+        expect(result).toEqual({reservations, totalRecords: 1});
         expect(mockReservationRepository.findByBookId).toHaveBeenCalledWith("214235l12", 0, 10);
     });
 
     it("should return an empty array and zero total records if no reservations are found", async () => {
-        mockReservationRepository.findByBookId.mockResolvedValue({ reservations: [], totalRecords: 0 });
+        mockReservationRepository.findByBookId.mockResolvedValue({reservations: [], totalRecords: 0});
 
         const result = await reservationService.getReservationsByBookId("214235l12", 1, 10);
 
-        expect(result).toEqual({ reservations: [], totalRecords: 0 });
+        expect(result).toEqual({reservations: [], totalRecords: 0});
         expect(mockReservationRepository.findByBookId).toHaveBeenCalledWith("214235l12", 0, 10);
     });
 });
@@ -189,8 +204,26 @@ describe("getReservationsByBookId Service", () => {
 describe("notifyUpcomingDueDate Service", () => {
     it("should send reminder emails for due reservations", async () => {
         const reservations: Reservation[] = [
-            { id: "4534546yyut-hhk", bookId: "342352FT", userEmail: "carmsoprano@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false },
-            { id: "4534546yyut-hjk", bookId: "342352FT", userEmail: "medowsoprano@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false }
+            {
+                id: "4534546yyut-hhk",
+                bookId: "342352FT",
+                userEmail: "carmsoprano@gmail.com",
+                bookCount: 1,
+                returnDate: new Date(),
+                reservationDate: new Date(),
+                isReturned: false,
+                isBought: false
+            },
+            {
+                id: "4534546yyut-hjk",
+                bookId: "342352FT",
+                userEmail: "medowsoprano@gmail.com",
+                bookCount: 1,
+                returnDate: new Date(),
+                reservationDate: new Date(),
+                isReturned: false,
+                isBought: false
+            }
         ];
 
         mockReservationRepository.findDueReservations.mockResolvedValue(reservations);
@@ -231,7 +264,8 @@ describe("finishReservation Service", () => {
             bookCount: 1,
             returnDate: new Date(),
             reservationDate: new Date(),
-            isReturned: false
+            isReturned: false,
+            isBought: false
         };
 
         mockReservationRepository.findById.mockResolvedValue(reservation);
@@ -263,7 +297,8 @@ describe("finishReservation Service", () => {
             bookCount: 1,
             returnDate: new Date(),
             reservationDate: new Date(),
-            isReturned: true
+            isReturned: true,
+            isBought: false
         };
 
         mockReservationRepository.findById.mockResolvedValue(reservation);
@@ -276,3 +311,64 @@ describe("finishReservation Service", () => {
         expect(mockReservationRepository.finishReservation).not.toHaveBeenCalled();
     });
 });
+
+describe("applyLateReturnCharge", () => {
+
+    it("should apply late return fees to overdue reservations", async () => {
+        const reservations: Reservation[] = [
+            {
+                id: "134534534-AGFGAF",
+                bookId: "21432JK",
+                userEmail: "bobsacamano@gmail.com.com",
+                reservationDate: new Date("2024-03-01"),
+                returnDate: new Date("2024-03-01"),
+                bookCount: 1,
+                isReturned: false,
+                isBought: false
+            },
+            {
+                id: "134534534-AGFGAA",
+                bookId: "242342JI",
+                userEmail: "lemos@gmail.com",
+                reservationDate: new Date("2024-03-01"),
+                returnDate: new Date("2024-03-02"),
+                bookCount: 2,
+                isReturned: false,
+                isBought: false
+            }
+        ];
+
+        const books: Book [] = [
+            {
+                bookId: "21432JK",
+                title: "Hamlet",
+                author: "Shakespare",
+                price: 10,
+                publicationYear: 1932,
+                publisher: "Petterman",
+                stock: 4
+            },
+            {
+                bookId: "242342JI",
+                title: "Romeo and Juliet",
+                author: "Shakespare",
+                price: 20,
+                publicationYear: 1921,
+                publisher: "Petterman",
+                stock: 4
+            }
+        ];
+
+        mockReservationRepository.findDueReservations.mockResolvedValue(reservations);
+        mockUserRepository.incrementBalance.mockResolvedValue(true);
+        mockBookRepository.findById
+            .mockResolvedValueOnce(books[0])
+            .mockResolvedValueOnce(books[1]);
+
+        await reservationService.applyLateReturnCharge();
+
+        expect(mockReservationRepository.findDueReservations).toHaveBeenCalled();
+        expect(mockUserRepository.incrementBalance).toHaveBeenCalledTimes(2);
+        expect(mockBookRepository.findById).toHaveBeenCalledTimes(2);
+    });
+})

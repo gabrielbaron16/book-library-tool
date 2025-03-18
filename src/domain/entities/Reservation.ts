@@ -6,6 +6,7 @@ export class Reservation {
         public returnDate: Date,
         public reservationDate: Date,
         public isReturned: boolean,
+        public isBought: boolean,
         public id?: string,
         public realReturnDate?: Date
     ) {}

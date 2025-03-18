@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import { container } from "../../../config/container";
+import {container} from "../../../config/container";
 import request from "supertest";
-import { IReservationService } from "../../../application/services/reservation/IReservationService";
-import { ControlledError } from "../../../domain/errors/ControlledError";
+import {IReservationService} from "../../../application/services/reservation/IReservationService";
+import {ControlledError} from "../../../domain/errors/ControlledError";
 import {ErrorResponseDTO} from "../dto/Error";
 import {ReservationDTO} from "../dto/ReservationDTO";
 import {Reservation} from "../../../domain/entities/Reservation";
@@ -25,7 +25,7 @@ beforeAll(async () => {
 
     container.registerInstance<IReservationService>("IReservationService", mockReservationService);
 
-    const { app: importedApp } = await import("../../../index");
+    const {app: importedApp} = await import("../../../index");
     app = importedApp;
 });
 
@@ -115,9 +115,17 @@ describe("POST /reservations", () => {
 describe("GET /reservations/book/:bookId", () => {
     it("should return reservations and total records for a valid bookId", async () => {
         const reservations: Reservation[] = [
-            { bookId: "1354534HGA", userEmail: "chrismoltisanti@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: true },
+            {
+                bookId: "1354534HGA",
+                userEmail: "chrismoltisanti@gmail.com",
+                bookCount: 1,
+                returnDate: new Date(),
+                reservationDate: new Date(),
+                isReturned: true,
+                isBought: false
+            },
         ];
-        mockReservationService.getReservationsByBookId.mockResolvedValue({ reservations, totalRecords: 1 });
+        mockReservationService.getReservationsByBookId.mockResolvedValue({reservations, totalRecords: 1});
 
         const response = await request(app).get("/reservations/book/1354534HGA?page=1&limit=10");
 
@@ -130,6 +138,7 @@ describe("GET /reservations/book/:bookId", () => {
                 returnDate: reservation.returnDate.toISOString(),
                 reservationDate: reservation.reservationDate.toISOString(),
                 isReturned: reservation.isReturned,
+                isBought: false
             })),
             totalRecords: 1,
         });
@@ -137,7 +146,7 @@ describe("GET /reservations/book/:bookId", () => {
     });
 
     it("should return 404 if no reservations are found", async () => {
-        mockReservationService.getReservationsByBookId.mockResolvedValue({ reservations: [], totalRecords: 0 });
+        mockReservationService.getReservationsByBookId.mockResolvedValue({reservations: [], totalRecords: 0});
 
         const response = await request(app).get("/reservations/book/1354534HGA?page=1&limit=10");
 

@@ -50,6 +50,7 @@ export class MongoReservationRepository implements IReservationRepository {
     async findActiveByBookId(bookId: string): Promise<Reservation[]> {
         const reservations = await ReservationModel.find({
             isReturned: false,
+            isBought: false,
             bookId: bookId
         }).lean();
         return reservations.map(doc => ({
@@ -73,11 +74,17 @@ export class MongoReservationRepository implements IReservationRepository {
         };
     }
 
-    async findDueReservations(startDate: Date, endDate: Date): Promise<Reservation[]> {
-        const query = {
+    async findDueReservations(startDate?: Date, endDate?: Date): Promise<Reservation[]> {
+        const query: any = {
             isReturned: false,
-            returnDate: { $gte: startDate, $lte: endDate }
+            isBought: false
         };
+
+        if (startDate || endDate) {
+            query.returnDate = {};
+            if (startDate) query.returnDate.$gte = startDate;
+            if (endDate) query.returnDate.$lte = endDate;
+        }
 
         const reservations = await ReservationModel.find(query).lean();
         return reservations.map(doc => ({
@@ -117,5 +124,11 @@ export class MongoReservationRepository implements IReservationRepository {
         } finally {
             await session.endSession();
         }
+    }
+
+    async buyReservation(reservationId: string): Promise<void> {
+        await ReservationModel.updateOne(
+            {_id: reservationId},
+            {$set: {isBought: true}});
     }
 }

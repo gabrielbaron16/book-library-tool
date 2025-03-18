@@ -8,6 +8,7 @@ export const mapReservationDtoToReservation = (reservationDto: ReservationDTO): 
         reservationDto.bookCount,
         reservationDto.returnDate,
         new Date(),
+        false,
         false
     );
 
@@ -19,6 +20,7 @@ export const mapReservationToReservationDto = (reservation: Reservation): Reserv
         reservation.returnDate,
         reservation.reservationDate,
         reservation.isReturned,
+        reservation.isBought,
         reservation.id,
         reservation.realReturnDate
     );

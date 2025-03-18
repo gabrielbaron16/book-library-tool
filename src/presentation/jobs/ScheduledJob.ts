@@ -3,11 +3,11 @@ import { container } from "tsyringe";
 import {IReservationService} from "../../application/services/reservation/IReservationService";
 import logger from "../../config/logger";
 
-export class ReminderJob {
+export class ScheduledJobs {
     static startJobs() {
         const reservationService = container.resolve<IReservationService>("IReservationService");
 
-        cron.schedule("*/1 * * * *", async () => {
+        cron.schedule("0 7 * * *", async () => {
             logger.info("Executing job for reminder emails...");
             const results = await Promise.allSettled([
                 reservationService.notifyUpcomingDueDate(),
@@ -19,6 +19,11 @@ export class ReminderJob {
                     logger.error(`Error in job ${index + 1}:`, result.reason);
                 }
             });
+        });
+
+        cron.schedule("0 8 * * *", async () => {
+            logger.info("Executing fee to charge clients with late returns...");
+            await reservationService.applyLateReturnCharge();
         });
     }
 }

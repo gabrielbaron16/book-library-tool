@@ -8,6 +8,7 @@ export interface IReservation extends Document {
     returnDate: Date;
     realReturnDate?: Date;
     isReturned: boolean;
+    isBought: boolean;
 }
 
 const ReservationSchema = new Schema<IReservation>({
@@ -17,7 +18,8 @@ const ReservationSchema = new Schema<IReservation>({
     reservationDate: {type: Date, required: true},
     returnDate: {type: Date, required: true, index: true},
     realReturnDate: {type: Date},
-    isReturned: {type: Boolean, required: true, index: true}
+    isReturned: {type: Boolean, required: true, index: true},
+    isBought: {type: Boolean, required: true, index: true}
 });
 
 export const ReservationModel = mongoose.model<IReservation>("Reservation", ReservationSchema);

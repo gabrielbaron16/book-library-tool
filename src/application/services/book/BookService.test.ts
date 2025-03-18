@@ -140,7 +140,7 @@ describe("BookService", () => {
 
     it("should thrown a error if book has activeReservations", async () => {
         const reservations: Reservation[] = [
-            { bookId: "342535HD1", userEmail: "bernal@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false, id: "3424534654-fghfjfhj" },
+            { bookId: "342535HD1", userEmail: "bernal@gmail.com", bookCount: 1, returnDate: new Date(), reservationDate: new Date(), isReturned: false, isBought: false, id: "3424534654-fghfjfhj" },
         ];
         mockReservationRepository.findActiveByBookId.mockResolvedValue(reservations);
 

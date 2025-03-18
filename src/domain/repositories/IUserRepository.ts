@@ -4,5 +4,6 @@ export interface IUserRepository {
     save(user: User): Promise<void>;
     getBalance(email: string): Promise<number | null>;
     updateBalance(email: string, newBalance: number): Promise<boolean>;
+    incrementBalance(email: string, amount: number): Promise<boolean>;
     exists(email: string): Promise<boolean>;
 }

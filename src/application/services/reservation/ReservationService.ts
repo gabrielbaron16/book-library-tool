@@ -6,11 +6,14 @@ import {IUserRepository} from "../../../domain/repositories/IUserRepository";
 import {Reservation} from "../../../domain/entities/Reservation";
 import {ControlledError} from "../../../domain/errors/ControlledError";
 import {IEmailService} from "../../../domain/email/IEmailService";
+import {DateUtils} from "../../../domain/utils/dateUtils";
+import logger from "../../../config/logger";
 
 const RESERVATION_COST = 3;
 const DAYS_BEFORE_DUE_DATE = 2;
 const DAYS_AFTER_DUE_DATE = 3
 const CHUNK_SIZE = 10;
+const LATE_FEE = 0.2;
 
 @injectable()
 export class ReservationService implements IReservationService {
@@ -79,7 +82,7 @@ export class ReservationService implements IReservationService {
                         return this.emailService.sendEmail(reservation.userEmail, subject, text);
                     }
                 } catch (error) {
-                    console.error(`Error processing reservation ${reservation.bookId}:`, error);
+                    logger.error(`Error processing reservation ${reservation.bookId}:`, error);
                 }
             }));
         }
@@ -109,7 +112,7 @@ export class ReservationService implements IReservationService {
                         return this.emailService.sendEmail(reservation.userEmail, subject, text);
                     }
                 } catch (error) {
-                    console.error(`Error processing reservation ${reservation.bookId}:`, error);
+                    logger.error(`Error processing reservation ${reservation.bookId}:`, error);
                 }
             }));
         }
@@ -125,5 +128,38 @@ export class ReservationService implements IReservationService {
         }
         await this.reservationRepository.finishReservation(reservation, new Date());
         return true
+    }
+
+    async applyLateReturnCharge(): Promise<void> {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const endDate = new Date(today);
+        endDate.setDate(today.getDate() + 1);
+
+        const reservations = await this.reservationRepository.findDueReservations(undefined, endDate);
+        for (let i = 0; i < reservations.length; i += CHUNK_SIZE) {
+            const chunk = reservations.slice(i, i + CHUNK_SIZE);
+            await Promise.all(chunk.map(async (reservation) => {
+                try {
+                    const result = await this.userRepository.incrementBalance(reservation.userEmail, -LATE_FEE);
+                    if (result){
+                        const book = await this.bookRepository.findById(reservation.bookId);
+                        if (book){
+                            const daysLate = DateUtils.getDaysDifference(reservation.returnDate);
+                            const totalLateFee = daysLate * LATE_FEE * reservation.bookCount;
+                            const bookPrice = book.price * reservation.bookCount;
+
+                            if (totalLateFee >= bookPrice && reservation.id) {
+                                logger.info(`Book ${reservation.bookId} has to be bought by ${reservation.userEmail}`);
+                                await this.reservationRepository.buyReservation(reservation.id);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    logger.error(`Error processing reservation ${reservation.bookId}:`, error);
+                }
+            }));
+        }
     }
 }
